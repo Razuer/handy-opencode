@@ -75,7 +75,7 @@ Subagents can spawn their own subagents, creating multi-level hierarchies. Three
 - **`level_limit`** (global, in top-level config): Max depth of the session tree. Caps depth. Default is 5.
 - **`permission.task`** (per-agent): Which subagents this agent can spawn, using glob patterns.
 
-Start conservative — `task_budget` of 3-5, increase if needed. Restrict `permission.task` to specific agents rather than using `task: "allow"`.
+**Default to leaving `task_budget` and `steps` unset.** Caps cause hallucinated conclusions from thin evidence — especially for planners, researchers, architects, and debuggers, whose whole job is iterative context-gathering. Set caps only for bounded work (formatters, fixers, leaf specialists). Use `permission.task` — not `task_budget` — as the safety lever.
 
 See `references/opencode-agent-format.md` for full details, configuration examples, session persistence (reusing `task_id`), and the orchestrator pattern.
 
@@ -179,7 +179,7 @@ Once you've gathered the requirements from the user (or inferred them from conte
 2. Choose permissions based on the Permission Decision Guide above
 3. Write the system prompt following the structure in "Writing the System Prompt"
 4. Select appropriate model and temperature
-5. Set `steps` to limit iterations if cost control matters (especially for subagents)
+5. Leave `steps` and `task_budget` unset by default. Cap only bounded work (formatters, fixers) — never exploratory agents.
 6. Create the file in the right location
 7. Tell the user how to test it (switch to it with Tab for primary, `@name` for subagent)
 
@@ -195,4 +195,4 @@ Agent creation is iterative. After the user tests the agent, they may want to ad
 - **Permissions**: If the agent keeps asking for approval it doesn't need, or does things it shouldn't.
 - **Model**: If the agent is too slow, too expensive, or not capable enough for the task.
 - **Temperature**: If outputs are too random or too rigid.
-- **Steps**: If the agent is burning through iterations (and cost) on subagent tasks. Set `steps` to cap iterations.
+- **Steps / task_budget**: Tune both directions. Hallucinating or stopping mid-investigation means the cap is too tight — raise or remove it. Burning cost on bounded work means add one. Default unset.

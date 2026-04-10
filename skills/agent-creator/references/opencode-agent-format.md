@@ -480,7 +480,7 @@ Each level has a budget that limits how many times it can call `task`, and `leve
 
 ### Tips for nested delegation
 
-- **Start conservative**: Set `task_budget` low (3-5) and increase if the agent runs out. A `task_budget` of 10 is generous for most workflows.
+- **Default to unset**: Leave `task_budget` (and `steps`) unset for exploratory agents — planners, researchers, architects, debuggers. Caps starve them of context and cause hallucination. Set only for bounded work: formatters, fixers, cost-sensitive leaf specialists.
 - **Use `level_limit` to prevent runaway recursion**: The default of 5 is usually fine. Lower it to 3 if you want tighter control.
 - **Restrict `permission.task` to specific agents**: Rather than `task: "allow"` (which lets the agent spawn any subagent), limit it to the agents that make sense for its role. A coder shouldn't need to spawn a researcher if it's not supposed to do web lookups.
 - **The `task_budget` counts against the delegating agent, not the subagent**: If architect has `task_budget: 10`, it can spawn 10 total subagent sessions. Each subagent has its own independent budget.
