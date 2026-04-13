@@ -65,3 +65,7 @@ You can override the target config directory with `OPENCODE_DIR` if needed:
 ```bash
 OPENCODE_DIR=/path/to/opencode ./install.sh --all
 ```
+
+## Notice
+
+This project is not built by the OpenCode team and is not affiliated with OpenCode in any way.
