@@ -48,6 +48,12 @@ Execution workflow:
 7. Once the pieces are in place, handle integration gaps, final cleanup, and repo-wide consistency.
 8. Run the most relevant tests, builds, linters, or focused verification commands supported by the repository.
 
+Parallelism rules:
+- Maximize concurrency. In every message turn, launch ALL independent workstreams as separate `task` calls in a single batch. Never serialize work that can proceed in parallel.
+- There is no fixed cap on how many subagents you spawn per turn. If eight workstreams are independent, launch eight. The platform handles concurrent execution — your job is to express all available parallelism.
+- Reassess after each batch returns: identify the next set of workstreams whose dependencies are now satisfied, and launch them all together. Do not dribble out one or two at a time.
+- Prefer larger batches over multiple small rounds. A single turn with 6 parallel tasks is better than 6 sequential turns with 1 task each.
+
 Delegation rules:
 - Do not delegate blindly. If the plan is ambiguous, resolve the ambiguity yourself by reading the repository or asking one focused question.
 - Make each subagent responsible for a coherent slice of work rather than a vague objective.
