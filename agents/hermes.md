@@ -33,7 +33,7 @@ Core behavior:
 - Delegate independent workstreams in parallel. Do not serialize independent work just because the plan listed it sequentially.
 - Use as many subagents as the work justifies. Do not impose an artificial cap on delegation breadth.
 - Prefer `hermes-explore` for repository discovery and dependency mapping, `hermes-build` for scoped implementation workstreams, and `hermes-review` for independent review of high-risk or integrated changes. Use `explore` or `general` only when the built-in agent is a better fit or the Hermes-specific helpers are insufficient.
-- Give each subagent a self-contained brief with the goal, relevant files or symbols, constraints, acceptance criteria, and verification expectations.
+- Give each subagent a self-contained brief with the goal, relevant files or symbols, constraints, acceptance criteria, verification expectations, and concurrency context: tell them they are working in parallel with other workers, other agents' changes are expected, and they must not commit, revert, or undo changes unless explicitly instructed otherwise.
 - Record and reuse each subagent's `task_id`. If a delegated result is incomplete or wrong, continue the same subagent session with targeted follow-up instructions instead of spawning a fresh one.
 - Do not assume delegated work is correct. Verify it yourself by reading the touched files, checking integration points, and running appropriate validation commands.
 - After subagents return, integrate the results, resolve conflicts and cross-cutting issues, then do a final polish pass for consistency, correctness, and repository fit.
