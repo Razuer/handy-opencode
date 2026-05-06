@@ -244,7 +244,7 @@ See the "Writing Effective Prompts" section of SKILL.md for guidance on crafting
 
 ### permission
 
-Fine-grained control over what the agent can do. See the Permission System section below.
+Fine-grained control over what the agent can do. Omitted tools default to `allow`; configure only meaningful `ask`, `deny`, or scoped rules. See the Permission System section below.
 
 ### hidden
 
@@ -309,7 +309,11 @@ For Claude models with extended thinking:
 
 ## Permission System
 
-Permissions control what actions an agent can take. There are three levels:
+Permissions control what actions an agent can take. OpenCode is permissive by default: if a tool is omitted from `permission`, it is effectively `allow` and runs without approval unless a global config overrides it. Use `permission` for differences from the default, not for listing every allowed tool.
+
+Legacy `tools` config is deprecated in favor of `permission`.
+
+There are three levels:
 
 | Value | Behavior |
 |-------|----------|
@@ -340,7 +344,21 @@ Every tool in OpenCode can be permission-controlled. These are the tools you can
 | `skill` | Loading and using skills | Yes — allow/deny specific skills by name |
 | `doom_loop` | Entering interactive loop modes | No |
 
-Tools marked "Yes" for command-level rules accept an object with glob patterns instead of a simple string. The **last matching rule wins**, so put broader patterns first and specific overrides after.
+Tools marked "Yes" for command-level rules accept an object with glob patterns instead of a simple string. The **last matching rule wins**, so put broader patterns first and specific overrides after. Use catch-all rules like `"*": "ask"` or `"*": "deny"` so unmatched commands or agent names do not fall through to default allow.
+
+### Default-equivalent permission config
+
+This is effectively the same as omitting `permission` entirely:
+
+```json
+"permission": {
+  "edit": "allow",
+  "bash": "allow",
+  "webfetch": "allow"
+}
+```
+
+Prefer omitting default `allow` entries in real agent files.
 
 ### Basic permission config
 
@@ -348,7 +366,7 @@ Tools marked "Yes" for command-level rules accept an object with glob patterns i
 "permission": {
   "edit": "deny",
   "bash": "ask",
-  "webfetch": "allow"
+  "webfetch": "deny"
 }
 ```
 
@@ -360,7 +378,7 @@ For tools that support it, you can use glob patterns to allow or deny specific c
 "permission": {
   "bash": {
     "*": "ask",
-    "git status *": "allow",
+    "git status*": "allow",
     "git log*": "allow",
     "git diff*": "allow",
     "npm test*": "allow"
@@ -374,7 +392,7 @@ For tools that support it, you can use glob patterns to allow or deny specific c
 "permission": {
   "bash": {
     "*": "ask",
-    "git status *": "allow"
+    "git status*": "allow"
   }
 }
 ```
@@ -396,6 +414,8 @@ Control which subagents an agent can invoke. This is how you build delegation ch
 ```
 
 Users can always invoke any subagent via `@mention`, even if task permissions deny it.
+
+If `task` is omitted, delegation is allowed by default. Leaf subagents should usually set `task: "deny"`. Orchestrators should usually start with `"*": "deny"` and then allow only the intended subagents.
 
 ---
 
@@ -428,6 +448,7 @@ Together, these form a two-dimensional budget: `task_budget` caps breadth (how m
       "task_budget": 10,
       "permission": {
         "task": {
+          "*": "deny",
           "reviewer": "allow",
           "tester-*": "ask"
         }
@@ -453,6 +474,7 @@ mode: subagent
 task_budget: 10
 permission:
   task:
+    "*": "deny"
     "reviewer": "allow"
     "tester-*": "ask"
 ---
@@ -482,7 +504,7 @@ Each level has a budget that limits how many times it can call `task`, and `leve
 
 - **Default to unset**: Leave `task_budget` (and `steps`) unset for exploratory agents — planners, researchers, architects, debuggers. Caps starve them of context and cause hallucination. Set only for bounded work: formatters, fixers, cost-sensitive leaf specialists.
 - **Use `level_limit` to prevent runaway recursion**: The default of 5 is usually fine. Lower it to 3 if you want tighter control.
-- **Restrict `permission.task` to specific agents**: Rather than `task: "allow"` (which lets the agent spawn any subagent), limit it to the agents that make sense for its role. A coder shouldn't need to spawn a researcher if it's not supposed to do web lookups.
+- **Restrict `permission.task` to specific agents**: Rather than `task: "allow"` or an omitted `task` field, use `"*": "deny"` plus explicit allows for the agents that make sense for the role. A coder shouldn't need to spawn a researcher if it's not supposed to do web lookups.
 - **The `task_budget` counts against the delegating agent, not the subagent**: If architect has `task_budget: 10`, it can spawn 10 total subagent sessions. Each subagent has its own independent budget.
 
 ---
@@ -527,13 +549,13 @@ Create focused subagents that primary agents can delegate to:
       "model": "anthropic/claude-sonnet-4",
       "temperature": 0.1,
       "permission": {
-        "edit": "allow",
         "bash": {
           "*": "ask",
           "npm test*": "allow",
           "bun test*": "allow"
         },
-        "webfetch": "deny"
+        "webfetch": "deny",
+        "task": "deny"
       }
     }
   }
@@ -561,10 +583,10 @@ Create a primary agent that delegates to specialized subagents:
       }
     },
     "test-writer": {
-      "description": "Writes tests. Read-only except for test files.",
+      "description": "Writes tests. Keep edits scoped to test files in the prompt.",
       "mode": "subagent",
       "permission": {
-        "edit": "allow"
+        "task": "deny"
       }
     },
     "security-reviewer": {
@@ -579,7 +601,7 @@ Create a primary agent that delegates to specialized subagents:
       "description": "Writes documentation and comments.",
       "mode": "subagent",
       "permission": {
-        "edit": "allow"
+        "task": "deny"
       }
     }
   }
@@ -599,8 +621,7 @@ Create internal subagents that are only invoked programmatically:
       "hidden": true,
       "steps": 3,
       "permission": {
-        "edit": "allow",
-        "bash": "allow"
+        "task": "deny"
       }
     }
   }
@@ -623,7 +644,6 @@ Limit iterations and use a fast model:
       "permission": {
         "edit": "deny",
         "bash": "deny",
-        "webfetch": "allow",
         "task": "deny"
       }
     }
@@ -647,6 +667,7 @@ An orchestrator that delegates to specialists, where some specialists can delega
         "edit": "deny",
         "bash": "deny",
         "task": {
+          "*": "deny",
           "researcher": "allow",
           "coder": "allow",
           "tester": "allow"
@@ -659,7 +680,6 @@ An orchestrator that delegates to specialists, where some specialists can delega
       "permission": {
         "edit": "deny",
         "bash": "deny",
-        "webfetch": "allow",
         "task": "deny"
       }
     },
@@ -668,13 +688,13 @@ An orchestrator that delegates to specialists, where some specialists can delega
       "mode": "subagent",
       "task_budget": 5,
       "permission": {
-        "edit": "allow",
         "bash": {
           "*": "ask",
           "git diff*": "allow",
           "git log*": "allow"
         },
         "task": {
+          "*": "deny",
           "tester": "allow"
         }
       }
@@ -683,7 +703,6 @@ An orchestrator that delegates to specialists, where some specialists can delega
       "description": "Writes and runs tests to verify correctness",
       "mode": "subagent",
       "permission": {
-        "edit": "allow",
         "bash": {
           "*": "ask",
           "npm test*": "allow",
@@ -713,9 +732,9 @@ In this setup:
 description: Writes and maintains project documentation
 mode: subagent
 permission:
-  edit: allow
   bash: deny
   webfetch: deny
+  task: deny
 ---
 
 You are a technical writer. Create clear, comprehensive documentation.
@@ -784,6 +803,7 @@ permission:
   edit: ask
   bash: allow
   webfetch: deny
+  task: deny
 ---
 
 You are a debugging specialist. Your job is to find the root cause of bugs and errors.
@@ -812,9 +832,8 @@ mode: subagent
 model: anthropic/claude-sonnet-4
 temperature: 0.8
 permission:
-  edit: allow
   bash: deny
-  webfetch: allow
+  task: deny
 ---
 
 You are a creative writer with a gift for engaging prose. You write compelling content that connects with readers.
@@ -848,13 +867,13 @@ mode: subagent
 model: anthropic/claude-opus-4
 temperature: 0.1
 permission:
-  edit: allow
   bash:
     "*": ask
     "node *": allow
     "time *": allow
     "profiler*": allow
   webfetch: deny
+  task: deny
 ---
 
 You are a performance engineering specialist. Your mission is to make code faster without sacrificing correctness.

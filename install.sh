@@ -6,23 +6,27 @@ SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 OPENCODE_DIR=${OPENCODE_DIR:-"$HOME/.config/opencode"}
 SKILLS_SRC="$SCRIPT_DIR/skills"
 AGENTS_SRC="$SCRIPT_DIR/agents"
+COMMANDS_SRC="$SCRIPT_DIR/commands"
 SKILLS_DST="$OPENCODE_DIR/skills"
 AGENTS_DST="$OPENCODE_DIR/agents"
+COMMANDS_DST="$OPENCODE_DIR/commands"
 
 install_skills=false
 install_agents=false
+install_commands=false
 force=false
 
 usage() {
   cat <<'EOF'
 Usage: ./install.sh [options]
 
-Install handy-opencode skills and agents into your OpenCode config.
+Install handy-opencode skills, agents, and commands into your OpenCode config.
 
 Options:
   --skills     Install skills only
   --agents     Install agents only
-  --all        Install both skills and agents
+  --commands   Install commands only
+  --all        Install skills, agents, and commands
   --force      Replace existing targets
   --help       Show this help text
 
@@ -34,8 +38,9 @@ prompt_choice() {
   printf 'Select what to install:\n'
   printf '  1) Skills only\n'
   printf '  2) Agents only\n'
-  printf '  3) Skills and agents\n'
-  printf 'Choice [1-3]: '
+  printf '  3) Commands only\n'
+  printf '  4) Skills, agents, and commands\n'
+  printf 'Choice [1-4]: '
   read -r choice
 
   case "$choice" in
@@ -46,8 +51,12 @@ prompt_choice() {
       install_agents=true
       ;;
     3)
+      install_commands=true
+      ;;
+    4)
       install_skills=true
       install_agents=true
+      install_commands=true
       ;;
     *)
       printf 'Invalid choice: %s\n' "$choice" >&2
@@ -109,9 +118,13 @@ while [[ $# -gt 0 ]]; do
     --agents)
       install_agents=true
       ;;
+    --commands)
+      install_commands=true
+      ;;
     --all)
       install_skills=true
       install_agents=true
+      install_commands=true
       ;;
     --force)
       force=true
@@ -129,7 +142,7 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-if [[ "$install_skills" == false && "$install_agents" == false ]]; then
+if [[ "$install_skills" == false && "$install_agents" == false && "$install_commands" == false ]]; then
   prompt_choice
 fi
 
@@ -141,6 +154,10 @@ fi
 
 if [[ "$install_agents" == true ]]; then
   link_directory_contents "$AGENTS_SRC" "$AGENTS_DST" "agents"
+fi
+
+if [[ "$install_commands" == true ]]; then
+  link_directory_contents "$COMMANDS_SRC" "$COMMANDS_DST" "commands"
 fi
 
 printf 'Done.\n'

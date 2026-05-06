@@ -4,7 +4,7 @@ Repository of [OpenCode](https://opencode.ai) skills and agents for a plan-first
 
 ## Workflow
 
-This setup separates planning from implementation so repository analysis, code changes, and review can happen with clear boundaries.
+This setup separates planning from implementation so repository analysis, code changes, and review can happen with clear boundaries. It also includes repository-mapping agents and a command for generating sparse `AGENTS.md` guidance networks.
 
 ### Planning
 
@@ -35,6 +35,12 @@ Hermes remains responsible for integrating results, sending follow-up fixes back
 5. `hermes-review` performs independent review on risky or integrated changes.
 6. `hermes` resolves remaining issues, verifies the result, and closes the work.
 
+### Repository Guidance Mapping
+
+`atlas` is the primary agent for creating or refining a sparse network of root and nested `AGENTS.md` files. It delegates subtree discovery to the recursive `cartographer` subagent and writes the root guide last after the project shape is understood.
+
+Use the `agents-network` command to start that workflow for the current project or a target path.
+
 ## Installation
 
 Use the installer to choose what to add to your OpenCode config:
@@ -47,7 +53,8 @@ The installer runs interactively by default and lets you install:
 
 - skills only
 - agents only
-- both skills and agents
+- commands only
+- skills, agents, and commands
 
 It creates symlinks inside `~/.config/opencode/` so updates in this repository are reflected immediately.
 
@@ -56,6 +63,7 @@ For non-interactive usage:
 ```bash
 ./install.sh --skills
 ./install.sh --agents
+./install.sh --commands
 ./install.sh --all
 ./install.sh --all --force
 ```

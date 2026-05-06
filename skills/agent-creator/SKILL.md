@@ -5,7 +5,7 @@ description: Create and configure OpenCode agents using the native OpenCode agen
 
 # Agent Creator
 
-Create OpenCode agents that work well — the right type, the right permissions, the right prompt, the right model.
+Create OpenCode agents that work well: the right type, the right permissions, the right prompt, and the right model.
 
 OpenCode agents are configured in two formats: JSON (in `opencode.json`) and Markdown (in `.opencode/agents/` or `~/.config/opencode/agents/`). This skill guides you through making great agents in the OpenCode format.
 
@@ -33,13 +33,17 @@ Before writing anything, figure out what the user needs by asking these question
 
 Permissions are the most important and most commonly misconfigured part of an agent. Here's how to decide:
 
-**The principle**: Give the agent exactly what it needs, nothing more. An agent that can edit files but shouldn't is dangerous. An agent that can't edit files but should is frustrating.
+**Default behavior**: OpenCode is permissive by default. Built-in tools are effectively `allow` unless a global or per-agent `permission` entry overrides them. Do not list default-equivalent fields like `read: allow`, `edit: allow`, or `webfetch: allow` just to be explicit. Use `permission` for meaningful differences from the default: `ask`, `deny`, or scoped glob rules.
+
+**Use `permission`, not legacy `tools`.** The older `tools` config still exists in some examples, but it is deprecated in favor of `permission`.
+
+**The principle**: Give the agent exactly what it needs, nothing more. Because omitted permissions default to `allow`, restrictive agents need explicit denials. An agent that can edit files but shouldn't is dangerous. An agent that can't edit files but should is frustrating.
 
 ### Available tools you can control
 
 See `references/opencode-agent-format.md` for the full tools table. The most commonly configured tools are: `read`, `edit`, `glob`, `grep`, `list`, `bash`, `task`, `webfetch`, `websearch`, `codesearch`, `lsp`, `todowrite`, `question`, `external_directory`, `skill`, and `doom_loop`.
 
-Tools that support command-level rules (`bash`, `task`, `lsp`, `external_directory`, `skill`) accept an object with glob patterns instead of a simple `"allow"`/`"deny"`/`"ask"`. Put broader patterns first and specific overrides after — the **last matching rule wins**:
+Tools that support command-level rules (`bash`, `task`, `lsp`, `external_directory`, `skill`) accept an object with glob patterns instead of a simple `"allow"`/`"deny"`/`"ask"`. Put broader patterns first and specific overrides after: the **last matching rule wins**. Start restricted allowlists with `"*": "deny"` or approval-first rules with `"*": "ask"`:
 
 ```yaml
 permission:
@@ -57,15 +61,19 @@ permission:
 ### Quick permission patterns
 
 | Question | Permission |
-|----------|-----------|
-| Does it need to modify files? | If yes → `edit: "allow"` or `"ask"`. If no → `edit: "deny"` |
-| Does it need to run commands? | If yes → `bash: "allow"` or configure specific commands. If no → `bash: "deny"` |
-| Does it need to fetch web content? | If yes → `webfetch: "allow"`. If no → `webfetch: "deny"` |
-| Does it need to call other agents? | If yes → `task: "allow"` (or restrict which ones). If no → `task: "deny"` |
+|----------|------------|
+| Should normal automatic access be allowed? | Omit the field; default is `allow` |
+| Should a tool require approval? | Set it to `ask` |
+| Should a tool be blocked? | Set it to `deny` |
+| Should bash be mostly blocked but allow known safe commands? | Use `bash: {"*": "ask", "git diff*": "allow"}` or `{"*": "deny", ...}` |
+| Should an agent call only specific subagents? | Use `task: {"*": "deny", "agent-name": "allow"}` |
+| Should an agent never delegate? | Set `task: "deny"` |
 
 **Use `"ask"` when you want the user to approve actions.** This is great for agents that should show what they'd do before doing it (review agents, planning agents) or for agents where you want safety rails (debugging agents that might run destructive commands).
 
-**For subagents that other agents delegate to**, think about what the delegating agent expects. If a build agent delegates to a test-writer, the test-writer needs edit access to test files but probably shouldn't be running arbitrary bash commands.
+**For subagents that other agents delegate to**, think about what the delegating agent expects. If a build agent delegates to a test-writer, the test-writer can rely on default edit access, but probably should not run arbitrary bash commands. If the subagent is a leaf worker, set `task: "deny"`; omitted `task` means delegation is allowed by default.
+
+**Defense in depth**: Permissions are the enforcement layer, but still write behavioral constraints into the system prompt. Some OpenCode versions have had SDK/custom-agent permission bypass reports, especially around subagents, so be cautious with destructive workflows and verify critical permission behavior on the target version.
 
 ## Nested Delegation: Agents Calling Agents
 
@@ -73,9 +81,9 @@ Subagents can spawn their own subagents, creating multi-level hierarchies. Three
 
 - **`task_budget`** (per-agent): How many times this agent can invoke the `task` tool. Caps breadth.
 - **`level_limit`** (global, in top-level config): Max depth of the session tree. Caps depth. Default is 5.
-- **`permission.task`** (per-agent): Which subagents this agent can spawn, using glob patterns.
+- **`permission.task`** (per-agent): Which subagents this agent can spawn, using glob patterns. Because default permission is `allow`, use explicit allowlists for orchestrators and `task: "deny"` for leaf subagents.
 
-**Default to leaving `task_budget` and `steps` unset.** Caps cause hallucinated conclusions from thin evidence — especially for planners, researchers, architects, and debuggers, whose whole job is iterative context-gathering. Set caps only for bounded work (formatters, fixers, leaf specialists). Use `permission.task` — not `task_budget` — as the safety lever.
+**Default to leaving `task_budget` and `steps` unset.** Caps cause hallucinated conclusions from thin evidence, especially for planners, researchers, architects, and debuggers, whose whole job is iterative context-gathering. Set caps only for bounded work (formatters, fixers, leaf specialists). Use `permission.task`, not `task_budget`, as the safety lever.
 
 See `references/opencode-agent-format.md` for full details, configuration examples, session persistence (reusing `task_id`), and the orchestrator pattern.
 
@@ -176,7 +184,7 @@ The path is relative to the config file location. This is cleaner than embedding
 Once you've gathered the requirements from the user (or inferred them from context), create the agent file. Here's the workflow:
 
 1. Determine agent name, mode, and where it lives (project vs user)
-2. Choose permissions based on the Permission Decision Guide above
+2. Choose permissions based on the Permission Decision Guide above. Keep frontmatter minimal: omit default `allow` fields and include only meaningful `ask`, `deny`, or scoped rules.
 3. Write the system prompt following the structure in "Writing the System Prompt"
 4. Select appropriate model and temperature
 5. Leave `steps` and `task_budget` unset by default. Cap only bounded work (formatters, fixers) — never exploratory agents.
