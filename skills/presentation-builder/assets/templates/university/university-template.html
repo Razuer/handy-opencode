@@ -1,0 +1,2756 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>University Template · Politechnika Wrocławska</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  /* ─── Politechnika Wrocławska brand tokens (official 2024) ───────── */
+  :root {
+    /* Color */
+    --pwr-red:    #9A342D;   /* PANTONE 484 — primary burgundy */
+    --pwr-red-d:  #6c241f;   /* derived deep — accents on cream */
+    --pwr-cream:  #F1D1A2;   /* PANTONE 156 — official cream/peach */
+    --pwr-cream-l:#f9ecd5;   /* tint of cream — soft section bg */
+    --pwr-ink:    #000000;   /* official black */
+    --pwr-muted:  #6a625a;   /* warm grey, derived */
+    --pwr-hair:   #e3d8c8;   /* warm hairline, derived from cream */
+    --pwr-bg:     #ffffff;
+    --pwr-on-red: #F1D1A2;   /* cream sits on red in the brand */
+    --pwr-on-red-soft: rgba(241, 209, 162, 0.78);
+
+    /* Type — Trebuchet MS is the template font; Source Sans 3 is a web fallback. */
+    --font-sans:    "Trebuchet MS", "Source Sans 3", system-ui, sans-serif;
+    --font-display: "Trebuchet MS", "Source Sans 3", system-ui, sans-serif;
+    --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --font-serif:   "Source Serif 4", "Times New Roman", serif;
+
+    /* Type scale (1920×1080) */
+    --t-cover-title: 92px;
+    --t-divider:     132px;
+    --t-title:       60px;
+    --t-subtitle:    34px;
+    --t-body:        28px;
+    --t-small:       24px;
+    --t-mono:        24px;
+
+    /* Spacing */
+    --pad-top:    150px;   /* clears top rail (70px) + breathing room */
+    --pad-bottom: 130px;   /* clears footer chrome (60px) + breathing room */
+    --pad-x:      120px;
+    --gap-title:  48px;
+    --gap-item:   24px;
+    --gap-tight:  14px;
+
+    /* Chrome */
+    --rail-h:    70px;
+    --footer-h:  68px;
+  }
+
+  html, body { margin: 0; padding: 0; background: #0a0a0a; }
+  body {
+    font-family: var(--font-sans);
+    color: var(--pwr-ink);
+  }
+
+  /* ─── Language switching — every translatable run is wrapped in
+        <span class="i18n" data-en="..." data-pl="..."></span>.
+        A small script swaps textContent on lang change. ─────────── */
+  /* No CSS needed — JS handles the swap, see <script id="i18n"> */
+
+  deck-stage { background: var(--pwr-bg); }
+  deck-stage::part(stage) { background: #0a0a0a; }
+
+  section.slide {
+    width: 1920px; height: 1080px;
+    background: var(--pwr-bg); color: var(--pwr-ink);
+    box-sizing: border-box;
+    padding: var(--pad-top) var(--pad-x) var(--pad-bottom);
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+
+  /* ─── Top red rail ───────────────────────────────────────────────── */
+  .rail {
+    position: absolute; inset: 0 0 auto 0;
+    height: var(--rail-h);
+    background: var(--pwr-red);
+    color: var(--pwr-on-red);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 32px;
+    padding: 0 var(--pad-x);
+    font-family: var(--font-sans);
+    z-index: 2;
+  }
+  .rail .lockup {
+    display: flex; align-items: center;
+    height: 100%;
+  }
+  .rail .lockup img {
+    height: 44px; display: block;
+  }
+  .rail .lockup .lang-pl { display: none; }
+  body.lang-pl .rail .lockup .lang-en { display: none; }
+  body.lang-pl .rail .lockup .lang-pl { display: block; }
+
+  .rail .title-mid {
+    font-size: 24px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--pwr-on-red-soft);
+    text-align: center;
+    font-weight: 500;
+  }
+  .rail .meta {
+    font-size: 24px;
+    font-variant-numeric: tabular-nums;
+    color: var(--pwr-on-red-soft);
+    display: flex; gap: 18px; align-items: center;
+    font-weight: 500;
+  }
+
+  /* ─── Footer chrome ─────────────────────────────────────────────── */
+  .footer {
+    position: absolute; inset: auto 0 0 0;
+    height: var(--footer-h);
+    border-top: 1px solid var(--pwr-hair);
+    padding: 0 var(--pad-x);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 32px;
+    font-family: var(--font-sans);
+    font-size: 24px;
+    color: var(--pwr-muted);
+    background: var(--pwr-bg);
+    z-index: 2;
+  }
+  .footer .speaker { font-weight: 600; color: var(--pwr-ink); }
+  .footer .page { font-variant-numeric: tabular-nums; }
+  .footer .partners { display: flex; gap: 24px; align-items: center; }
+  .footer .partners img {
+    height: 36px; display: block; opacity: 0.85;
+    object-fit: contain;
+  }
+  body.no-footer .footer { display: none; }
+  body.no-partners .footer .partners { display: none; }
+
+  /* ─── Typography ─────────────────────────────────────────────────── */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--t-mono);
+    color: var(--pwr-red);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin: 0 0 var(--gap-tight) 0;
+  }
+  h1.title, h2.title {
+    font-family: var(--font-display);
+    font-size: var(--t-title);
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+    color: var(--pwr-ink);
+  }
+  .title-rule {
+    width: 88px; height: 4px; background: var(--pwr-red);
+    margin: 22px 0 12px;
+  }
+  .subtitle {
+    font-family: var(--font-sans);
+    font-size: var(--t-subtitle);
+    color: var(--pwr-muted);
+    line-height: 1.28;
+    margin: 0;
+    max-width: 1500px;
+    text-wrap: pretty;
+  }
+  .body {
+    font-size: var(--t-body);
+    line-height: 1.45;
+    color: var(--pwr-ink);
+    text-wrap: pretty;
+  }
+
+  .content { flex: 1; display: flex; flex-direction: column; gap: var(--gap-title); min-height: 0; }
+  .stack { display: flex; flex-direction: column; gap: var(--gap-item); }
+  .stack-tight { display: flex; flex-direction: column; gap: var(--gap-tight); }
+
+  /* ─── Slide 01 · Cover — fully overrides .slide padding ─────────── */
+  section.slide.cover {
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1.18fr 1fr;
+    grid-template-rows: 1fr auto;
+    overflow: hidden;
+  }
+  .cover-left {
+    grid-column: 1;
+    padding: 88px 88px 72px 110px;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    background: var(--pwr-bg);
+    gap: 48px;
+    min-height: 0;
+  }
+  .cover-brand {
+    display: flex; flex-direction: column; gap: 24px;
+    align-items: flex-start;
+  }
+  .cover-brand .pwr-mark img {
+    height: 132px; display: block;
+  }
+  .cover-brand .pwr-mark .lang-pl,
+  .cover-brand .pwr-mark.show-en .lang-pl { display: none; }
+  body.lang-pl .cover-brand .pwr-mark .lang-en { display: none; }
+  body.lang-pl .cover-brand .pwr-mark .lang-pl { display: block; }
+  .cover-brand .unit-line {
+    font-family: var(--font-sans);
+    font-size: 24px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--pwr-red);
+    font-weight: 700;
+    border-top: 3px solid var(--pwr-red);
+    padding-top: 16px;
+    width: fit-content;
+  }
+  .cover-title-block { display: flex; flex-direction: column; gap: 24px; }
+  .cover-title {
+    font-family: var(--font-display);
+    font-size: var(--t-cover-title);
+    font-weight: 700;
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    color: var(--pwr-ink);
+    margin: 0;
+    text-wrap: balance;
+    max-width: 1000px;
+  }
+  .cover-title em {
+    font-style: italic; font-family: var(--font-serif); font-weight: 500;
+    color: var(--pwr-red);
+  }
+  .cover-sub {
+    font-size: 30px;
+    line-height: 1.32;
+    color: var(--pwr-muted);
+    margin: 0;
+    max-width: 920px;
+    text-wrap: pretty;
+  }
+
+  .cover-right {
+    grid-column: 2;
+    background: var(--pwr-red);
+    color: var(--pwr-on-red);
+    padding: 88px 88px 72px;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+    min-height: 0;
+  }
+  .cover-right .pwr-eagle {
+    position: absolute; top: 96px; right: 88px;
+    height: 220px;
+  }
+  .cover-right .pwr-eagle img {
+    height: 100%; display: block;
+    /* The vert logo has a white background built in — we want the cover
+       version to feel embedded; the mark itself uses cream-on-red so it
+       reads well on the red panel. */
+  }
+  .cover-right .pwr-eagle .lang-pl { display: none; }
+  body.lang-pl .cover-right .pwr-eagle .lang-en { display: none; }
+  body.lang-pl .cover-right .pwr-eagle .lang-pl { display: block; }
+
+  .cover-right .meta-block {
+    display: flex; flex-direction: column; gap: 26px;
+  }
+  .cover-right .meta-block dt {
+    font-family: var(--font-sans);
+    font-size: 24px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--pwr-on-red-soft);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .cover-right .meta-block dd {
+    font-size: 30px; font-weight: 500; margin: 0; line-height: 1.2;
+    color: var(--pwr-on-red);
+  }
+
+  /* Cover footer strip — explicit height so it never gets clipped */
+  .cover-strip {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    height: 132px;
+    background: var(--pwr-cream-l);
+    border-top: 4px solid var(--pwr-red);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 0 var(--pad-x);
+    gap: 40px;
+    box-sizing: border-box;
+  }
+  .cover-strip .copy {
+    font-family: var(--font-sans);
+    font-size: 24px;
+    color: var(--pwr-red-d);
+    letter-spacing: 0.04em;
+    font-weight: 500;
+  }
+  .cover-strip .partners {
+    display: flex; align-items: center; gap: 44px;
+  }
+  .cover-strip .partners img {
+    height: 64px; display: block;
+    object-fit: contain;
+  }
+  .cover-strip .partners .sep {
+    width: 1px; height: 56px; background: rgba(0,0,0,.15);
+  }
+
+  /* ─── Section divider — full-bleed red ───────────────────────────── */
+  section.slide.divider {
+    padding: 0;
+    background: var(--pwr-red);
+    color: var(--pwr-on-red);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+  section.slide.divider .rail {
+    background: transparent;
+    border-bottom: 1px solid rgba(241, 209, 162, 0.25);
+    position: static;
+  }
+  section.slide.divider .body-area {
+    padding: 0 var(--pad-x);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 80px;
+    min-height: 0;
+  }
+  .divider-num {
+    font-family: var(--font-display);
+    font-size: 360px;
+    line-height: 0.85;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: rgba(241, 209, 162, 0.16);
+  }
+  .divider-block { display: flex; flex-direction: column; gap: 24px; }
+  .divider-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 26px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--pwr-on-red-soft); font-weight: 700;
+  }
+  .divider-title {
+    font-family: var(--font-display);
+    font-size: var(--t-divider);
+    font-weight: 700;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin: 0;
+    text-wrap: balance;
+    max-width: 1300px;
+    color: var(--pwr-on-red);
+  }
+  .divider-rule { width: 120px; height: 4px; background: var(--pwr-on-red); }
+  .divider-lede {
+    font-size: 30px; line-height: 1.3;
+    color: var(--pwr-on-red-soft);
+    max-width: 900px; margin: 0;
+  }
+  .divider-foot {
+    padding: 0 var(--pad-x) 40px;
+    display: flex; justify-content: space-between;
+    font-family: var(--font-sans);
+    font-size: 24px;
+    color: var(--pwr-on-red-soft);
+  }
+
+  /* ─── Agenda ─────────────────────────────────────────────────────── */
+  ol.agenda { margin: 0; padding: 0; list-style: none; }
+  ol.agenda li {
+    display: grid;
+    grid-template-columns: 90px 1fr auto;
+    align-items: center;
+    gap: 36px;
+    padding: 24px 0;
+    border-top: 1px solid var(--pwr-hair);
+    font-size: var(--t-body);
+  }
+  ol.agenda li:last-child { border-bottom: 1px solid var(--pwr-hair); }
+  ol.agenda li .idx {
+    font-family: var(--font-mono);
+    font-size: var(--t-mono);
+    color: var(--pwr-red);
+    font-weight: 500;
+  }
+  ol.agenda li .label { font-weight: 700; font-size: 32px; }
+  ol.agenda li .dur {
+    font-family: var(--font-mono);
+    font-size: var(--t-small);
+    color: var(--pwr-muted);
+  }
+
+  /* ─── Bulleted body ──────────────────────────────────────────────── */
+  ul.bullets { margin: 0; padding: 0; list-style: none; }
+  ul.bullets li {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 16px;
+    padding: 20px 0;
+    border-top: 1px solid var(--pwr-hair);
+    font-size: var(--t-body); line-height: 1.4;
+  }
+  ul.bullets li:last-child { border-bottom: 1px solid var(--pwr-hair); }
+  ul.bullets li::before {
+    content: ""; display: block;
+    width: 14px; height: 14px;
+    margin-top: 14px;
+    background: var(--pwr-red);
+    transform: rotate(45deg);
+  }
+  ul.bullets .b-title { font-weight: 700; }
+  ul.bullets .b-desc  { color: var(--pwr-muted); display: block; margin-top: 6px; font-size: var(--t-small); line-height: 1.4; }
+
+  /* ─── Quote ──────────────────────────────────────────────────────── */
+  .quote {
+    background: var(--pwr-cream-l);
+    margin: 0 -120px;
+    padding: 80px 220px;
+    border-left: 16px solid var(--pwr-red);
+    flex: 1;
+    display: flex; flex-direction: column; justify-content: center;
+    gap: 36px;
+    min-height: 0;
+  }
+  .quote .mark {
+    font-family: var(--font-serif);
+    font-size: 200px;
+    line-height: 0.5;
+    color: var(--pwr-red);
+    font-weight: 700;
+  }
+  .quote .body {
+    font-family: var(--font-serif);
+    font-size: 64px;
+    line-height: 1.14;
+    letter-spacing: -0.01em;
+    font-weight: 500;
+    color: var(--pwr-ink);
+    margin: 0;
+    max-width: 1400px;
+    text-wrap: balance;
+  }
+  .quote .attr {
+    font-family: var(--font-sans);
+    font-size: 24px;
+    color: var(--pwr-red-d);
+    letter-spacing: 0.04em;
+    display: flex; gap: 16px; align-items: baseline;
+    border-top: 1px solid rgba(154,52,45,.25);
+    padding-top: 18px;
+    flex-wrap: wrap;
+  }
+  .quote .attr .name { font-weight: 700; color: var(--pwr-red-d); }
+  .quote .attr .ref  { color: var(--pwr-muted); font-style: italic; font-family: var(--font-serif); }
+
+  /* ─── Two-column comparison ──────────────────────────────────────── */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; flex: 1; min-height: 0; }
+  .compare {
+    display: flex; flex-direction: column; gap: 18px;
+    padding: 28px 28px 28px 0;
+    border-left: 6px solid var(--pwr-hair);
+    padding-left: 32px;
+  }
+  .compare.alt { border-left-color: var(--pwr-red); }
+  .compare-tag {
+    font-family: var(--font-sans);
+    font-size: 24px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--pwr-muted); font-weight: 700;
+  }
+  .compare.alt .compare-tag { color: var(--pwr-red); }
+  .compare-h {
+    font-size: 42px; font-weight: 700; line-height: 1.12; letter-spacing: -0.01em;
+    margin: 0; text-wrap: balance;
+  }
+  .compare-body { font-size: var(--t-body); line-height: 1.4; color: var(--pwr-muted); margin: 0; }
+  .compare-list { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 0; }
+  .compare-list li {
+    display: grid; grid-template-columns: 28px 1fr; gap: 12px;
+    padding: 14px 0; border-top: 1px solid var(--pwr-hair);
+    font-size: var(--t-small); line-height: 1.4;
+  }
+  .compare-list li::before { content: "→"; color: var(--pwr-muted); font-family: var(--font-mono); }
+  .compare.alt .compare-list li::before { color: var(--pwr-red); }
+
+  /* ─── Big stat ───────────────────────────────────────────────────── */
+  .stat-row { display: grid; grid-template-columns: 1.3fr 1fr; gap: 80px; flex: 1; align-items: center; }
+  .big-num {
+    font-family: var(--font-display);
+    font-size: 340px; line-height: 0.9;
+    font-weight: 700; letter-spacing: -0.05em;
+    color: var(--pwr-red);
+    margin: 0;
+  }
+  .big-num .unit { font-size: 120px; color: var(--pwr-ink); margin-left: 8px; }
+  .stat-side { display: flex; flex-direction: column; gap: 28px; }
+  .stat-label {
+    font-family: var(--font-sans);
+    font-size: 26px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--pwr-red); font-weight: 700;
+  }
+  .stat-desc { font-size: 34px; line-height: 1.25; color: var(--pwr-ink); margin: 0; text-wrap: pretty; }
+  .stat-foot {
+    font-size: var(--t-small); color: var(--pwr-muted);
+    border-top: 1px solid var(--pwr-hair);
+    padding-top: 18px;
+  }
+
+  /* ─── Pipeline ───────────────────────────────────────────────────── */
+  .pipeline {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+  .step {
+    background: var(--pwr-cream-l);
+    padding: 30px 24px;
+    display: flex; flex-direction: column; gap: 12px;
+    position: relative;
+    border-top: 4px solid var(--pwr-red);
+  }
+  .step-idx {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    color: var(--pwr-red);
+    font-weight: 500;
+  }
+  .step-h { font-size: 30px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; margin: 0; }
+  .step-d { font-size: var(--t-small); line-height: 1.4; color: var(--pwr-muted); margin: 0; }
+  .step-tag {
+    margin-top: auto;
+    font-family: var(--font-mono); font-size: 24px;
+    color: var(--pwr-red-d);
+    padding-top: 14px;
+    border-top: 1px dashed var(--pwr-hair);
+  }
+
+  /* ─── Table ──────────────────────────────────────────────────────── */
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--t-small);
+    font-variant-numeric: tabular-nums;
+  }
+  table.data thead th {
+    text-align: left; padding: 16px 14px;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 24px; color: var(--pwr-on-red);
+    background: var(--pwr-red);
+    letter-spacing: 0.04em;
+  }
+  table.data thead th.num { text-align: right; }
+  table.data tbody td {
+    padding: 16px 14px;
+    border-bottom: 1px solid var(--pwr-hair);
+    font-size: 26px;
+  }
+  table.data tbody td.num { text-align: right; font-family: var(--font-mono); }
+  table.data tbody tr.best td { background: var(--pwr-cream-l); }
+  table.data tbody tr.best td:first-child { font-weight: 700; color: var(--pwr-red-d); }
+  table.data tbody td.delta-pos { color: var(--pwr-red); font-family: var(--font-mono); font-weight: 500; }
+  .table-cap {
+    font-family: var(--font-sans); font-size: 24px; color: var(--pwr-muted);
+    margin-top: 14px; font-style: italic;
+  }
+
+  /* ─── Image-led ──────────────────────────────────────────────────── */
+  .image-led { display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; flex: 1; min-height: 0; }
+  .image-frame {
+    background: var(--pwr-cream-l);
+    border: 1px solid var(--pwr-hair);
+    overflow: hidden;
+    height: 100%;
+    min-height: 0;
+  }
+  image-slot { width: 100%; height: 100%; display: block; }
+  .caption-row {
+    margin-top: 20px;
+    font-family: var(--font-sans); font-size: 24px; color: var(--pwr-muted);
+    display: flex; gap: 20px;
+    border-top: 1px solid var(--pwr-hair); padding-top: 14px;
+  }
+  .caption-row .ref { font-weight: 700; color: var(--pwr-red); }
+
+  /* ─── Timeline ───────────────────────────────────────────────────── */
+  .timeline {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    border-top: 4px solid var(--pwr-red);
+  }
+  .tl-col {
+    padding: 28px 22px;
+    border-right: 1px solid var(--pwr-hair);
+    display: flex; flex-direction: column; gap: 14px;
+    min-height: 360px;
+    background: var(--pwr-bg);
+  }
+  .tl-col:last-child { border-right: none; }
+  .tl-col.alt { background: var(--pwr-cream-l); }
+  .tl-month {
+    font-family: var(--font-mono); font-size: var(--t-mono); color: var(--pwr-muted);
+    letter-spacing: 0.04em;
+  }
+  .tl-pill {
+    display: inline-block;
+    background: var(--pwr-ink); color: var(--pwr-cream);
+    font-size: 24px; font-weight: 700;
+    padding: 8px 14px;
+    align-self: flex-start;
+  }
+  .tl-pill.alt { background: var(--pwr-red); color: var(--pwr-on-red); }
+  .tl-note { font-size: 24px; line-height: 1.4; color: var(--pwr-ink); margin: 0; }
+
+  /* ─── References ─────────────────────────────────────────────────── */
+  ol.refs { margin: 0; padding: 0; list-style: none; column-count: 2; column-gap: 80px; }
+  ol.refs li {
+    break-inside: avoid;
+    display: grid; grid-template-columns: 60px 1fr;
+    gap: 14px; padding: 16px 0;
+    border-top: 1px solid var(--pwr-hair);
+    font-size: var(--t-small); line-height: 1.4;
+  }
+  ol.refs li .ref-idx { font-family: var(--font-mono); color: var(--pwr-red); font-size: 24px; font-weight: 500; }
+  ol.refs li .ref-body .ref-authors { font-weight: 700; }
+  ol.refs li .ref-body .ref-venue  { color: var(--pwr-muted); font-style: italic; }
+  ol.refs li .ref-body .ref-doi    { font-family: var(--font-mono); color: var(--pwr-muted); font-size: 24px; display: block; margin-top: 4px; }
+
+  /* ─── Closing / Q&A ──────────────────────────────────────────────── */
+  section.slide.qa {
+    background: var(--pwr-red);
+    color: var(--pwr-on-red);
+    padding: 0;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+  section.slide.qa .rail {
+    background: transparent;
+    border-bottom: 1px solid rgba(241, 209, 162, 0.25);
+    position: static;
+  }
+  .qa-mid {
+    padding: 0 var(--pad-x);
+    display: flex; flex-direction: column;
+    justify-content: center;
+    gap: 32px;
+    min-height: 0;
+  }
+  .qa-eye {
+    font-family: var(--font-sans);
+    font-size: 26px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--pwr-on-red-soft); font-weight: 700;
+  }
+  .qa-h {
+    font-family: var(--font-display);
+    font-size: 220px; font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin: 0;
+    color: var(--pwr-on-red);
+  }
+  .qa-sub {
+    font-size: var(--t-subtitle);
+    color: var(--pwr-on-red-soft);
+    line-height: 1.25;
+    margin: 0;
+    max-width: 1300px;
+  }
+  .qa-bottom {
+    padding: 28px var(--pad-x);
+    border-top: 1px solid rgba(241, 209, 162, 0.25);
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 60px;
+    font-family: var(--font-sans);
+    font-size: 24px;
+  }
+  .qa-bottom dt { color: var(--pwr-on-red-soft); margin-bottom: 4px; font-size: 24px;
+                  letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; }
+  .qa-bottom dd { color: var(--pwr-on-red); margin: 0; font-weight: 500; font-size: 26px; }
+
+  /* ─── Tweak: density ─────────────────────────────────────────────── */
+  body.compact  { --pad-top: 120px; --pad-bottom: 100px; --pad-x: 90px; --gap-title: 36px; --gap-item: 18px; }
+  body.spacious { --pad-top: 180px; --pad-bottom: 160px; --pad-x: 150px; --gap-title: 64px; --gap-item: 32px; }
+
+  /* ─── Tweak: dark mode ───────────────────────────────────────────── */
+  body.dark { --pwr-bg: #161312; --pwr-ink: #F1D1A2; --pwr-muted: #b8a795;
+              --pwr-hair: #2a2421; --pwr-cream-l: #1f1a17; }
+  body.dark .footer, body.dark section.slide { background: var(--pwr-bg); }
+  body.dark .footer { color: var(--pwr-muted); }
+  body.dark .footer .partners img { filter: invert(1) brightness(2); opacity: 0.7; }
+  body.dark .step { background: #221d1a; }
+
+
+  /* ═════════════ NEW SLIDE TYPES ═════════════════════════════════════ */
+
+  /* ─── Definition card ────────────────────────────────────────────── */
+  .def-grid { display: grid; grid-template-columns: 1fr 1.25fr; gap: 80px; flex: 1; align-items: center; min-height: 0; }
+  .def-card {
+    background: var(--pwr-cream-l);
+    padding: 56px 48px;
+    display: flex; flex-direction: column; gap: 24px;
+    border-top: 6px solid var(--pwr-red);
+  }
+  .def-tag {
+    font-family: var(--font-sans); font-size: 24px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--pwr-red); font-weight: 700;
+  }
+  .def-term {
+    font-family: var(--font-display);
+    font-size: 76px; font-weight: 700; line-height: 1.0;
+    letter-spacing: -0.02em; color: var(--pwr-ink); margin: 0;
+    text-wrap: balance;
+  }
+  .def-notation {
+    font-family: var(--font-serif); font-style: italic;
+    font-size: 38px; color: var(--pwr-red-d); margin: 0;
+    border-top: 1px solid rgba(154,52,45,.25); padding-top: 18px;
+  }
+  .def-body { font-size: 30px; line-height: 1.4; color: var(--pwr-ink); margin: 0; text-wrap: pretty; }
+  .def-side-h { font-family: var(--font-sans); font-size: 24px; letter-spacing: 0.14em;
+                text-transform: uppercase; color: var(--pwr-red); font-weight: 700;
+                border-bottom: 2px solid var(--pwr-red); padding-bottom: 14px; margin-bottom: 8px; }
+
+  /* ─── Full-bleed photo overlay ───────────────────────────────────── */
+  section.slide.bleed { padding: 0; overflow: hidden; }
+  section.slide.bleed .bleed-img {
+    position: absolute; inset: 0;
+  }
+  section.slide.bleed image-slot { width: 100%; height: 100%; display: block; }
+  section.slide.bleed .bleed-shade {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0.0) 0%,
+      rgba(0,0,0,0.0) 40%,
+      rgba(0,0,0,0.55) 78%,
+      rgba(0,0,0,0.85) 100%);
+    pointer-events: none;
+  }
+  section.slide.bleed .bleed-content {
+    position: absolute; left: var(--pad-x); right: var(--pad-x);
+    bottom: 96px;
+    color: var(--pwr-cream);
+    display: flex; flex-direction: column; gap: 20px;
+    z-index: 2;
+  }
+  section.slide.bleed .bleed-eye {
+    font-family: var(--font-sans); font-size: 24px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--pwr-cream); font-weight: 700;
+    border-left: 4px solid var(--pwr-red); padding-left: 16px;
+    align-self: flex-start;
+  }
+  section.slide.bleed .bleed-title {
+    font-family: var(--font-display); font-size: 80px;
+    font-weight: 700; line-height: 1.04;
+    letter-spacing: -0.02em; color: #fff; margin: 0;
+    text-wrap: balance; max-width: 1500px;
+  }
+  section.slide.bleed .bleed-sub {
+    font-size: 28px; line-height: 1.35; color: rgba(255,255,255,.85);
+    margin: 0; max-width: 1300px;
+  }
+  section.slide.bleed .bleed-cred {
+    position: absolute; top: 88px; right: var(--pad-x);
+    font-family: var(--font-mono); font-size: 24px;
+    color: rgba(255,255,255,.6);
+    z-index: 2;
+  }
+
+  /* ─── 3-column comparison ────────────────────────────────────────── */
+  .cols-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; flex: 1; min-height: 0; }
+  .cols-3 .compare { padding: 22px 22px 22px 0; padding-left: 24px; gap: 14px; }
+  .cols-3 .compare-h { font-size: 32px; line-height: 1.15; }
+  .cols-3 .compare-body { font-size: 24px; line-height: 1.35; }
+  .cols-3 .compare-list li { padding: 10px 0; font-size: 24px; line-height: 1.3; }
+
+  /* ─── Equation showcase ──────────────────────────────────────────── */
+  .eq-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 64px; flex: 1; align-items: stretch; min-height: 0; }
+  .eq-display {
+    background: var(--pwr-cream-l);
+    border-left: 8px solid var(--pwr-red);
+    padding: 64px 56px;
+    display: flex; flex-direction: column; gap: 36px;
+    justify-content: center;
+  }
+  .eq {
+    font-family: var(--font-serif);
+    font-size: 64px; line-height: 1.2;
+    text-align: center; color: var(--pwr-ink);
+    margin: 0;
+    font-variant-numeric: lining-nums;
+  }
+  .eq .var  { font-style: italic; }
+  .eq .op   { color: var(--pwr-red); padding: 0 8px; font-style: normal; }
+  .eq .fn   { color: var(--pwr-red-d); font-style: normal; }
+  .eq .agg  { font-family: var(--font-sans); font-style: normal; font-weight: 600;
+              font-size: 0.62em; letter-spacing: 0.04em; color: var(--pwr-red-d);
+              vertical-align: 0.18em; }
+  .eq sub, .eq sup { font-size: 0.55em; line-height: 0; }
+  .eq sub { vertical-align: -0.25em; }
+  .eq sup { vertical-align: 0.55em; }
+  .eq-cap { font-family: var(--font-sans); font-size: 24px;
+            color: var(--pwr-muted); text-align: center; margin: 0;
+            font-style: italic; }
+  dl.eq-vars { margin: 0; display: flex; flex-direction: column; gap: 18px; }
+  dl.eq-vars > div {
+    display: grid; grid-template-columns: 100px 1fr;
+    gap: 20px; align-items: baseline;
+    border-top: 1px solid var(--pwr-hair); padding-top: 14px;
+  }
+  dl.eq-vars > div:first-child { border-top: none; padding-top: 0; }
+  dl.eq-vars dt {
+    font-family: var(--font-serif); font-style: italic;
+    font-size: 32px; color: var(--pwr-red);
+  }
+  dl.eq-vars dd { margin: 0; font-size: 24px; line-height: 1.35; color: var(--pwr-ink); }
+
+  /* ─── Code / pseudocode ──────────────────────────────────────────── */
+  .code-grid { display: grid; grid-template-columns: 1.7fr 1fr; gap: 56px; flex: 1; min-height: 0; }
+  .code-block {
+    background: #1f1a17; color: #f5e6c8;
+    padding: 28px 32px;
+    font-family: var(--font-mono); font-size: 24px; line-height: 1.5;
+    overflow: hidden;
+    display: flex; flex-direction: column; gap: 0;
+    border-top: 4px solid var(--pwr-red);
+  }
+  .code-block .filename {
+    color: rgba(245,230,200,.5);
+    font-size: 24px; padding-bottom: 14px; margin-bottom: 14px;
+    border-bottom: 1px dashed rgba(245,230,200,.18);
+    display: flex; justify-content: space-between;
+  }
+  .code-block .line {
+    display: grid; grid-template-columns: 44px 1fr;
+    gap: 16px; align-items: baseline;
+  }
+  .code-block .line.blank { min-height: 0.5em; }
+  .code-block .ln { color: rgba(245,230,200,.28); text-align: right; user-select: none; font-variant-numeric: tabular-nums; }
+  .code-block .kw  { color: #F1D1A2; font-weight: 600; }
+  .code-block .cm  { color: rgba(245,230,200,.45); font-style: italic; }
+  .code-block .fn  { color: #ffb37a; }
+  .code-block .str { color: #d4b495; }
+  .code-block .num { color: #f9ecd5; }
+  .code-block .ind { display: inline-block; width: 1.5em; }
+
+  body.code-light .code-block { background: var(--pwr-cream-l); color: var(--pwr-ink); border-top-color: var(--pwr-red); }
+  body.code-light .code-block .filename { color: var(--pwr-muted); border-bottom-color: rgba(0,0,0,.12); }
+  body.code-light .code-block .ln  { color: rgba(0,0,0,.28); }
+  body.code-light .code-block .kw  { color: var(--pwr-red); }
+  body.code-light .code-block .cm  { color: var(--pwr-muted); }
+  body.code-light .code-block .fn  { color: var(--pwr-red-d); }
+  body.code-light .code-block .str { color: #8a5a3a; }
+
+  .code-notes { display: flex; flex-direction: column; gap: 28px; }
+  .code-note { padding: 18px 20px 18px 22px; border-left: 4px solid var(--pwr-red); background: var(--pwr-cream-l); }
+  .code-note h4 {
+    font-family: var(--font-sans); font-size: 24px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--pwr-red); font-weight: 700; margin: 0 0 8px;
+  }
+  .code-note p { font-size: 24px; line-height: 1.4; color: var(--pwr-ink); margin: 0; }
+  body.dark .code-note { background: #1f1d1b; }
+
+  /* ─── Bar chart ──────────────────────────────────────────────────── */
+  .chart-wrap { display: grid; grid-template-columns: 1.7fr 1fr; gap: 64px; flex: 1; min-height: 0; }
+  .bar-chart { display: flex; flex-direction: column; min-height: 0; padding-top: 40px; }
+  .bars-row {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    gap: 28px; flex: 1; align-items: end;
+    border-bottom: 3px solid var(--pwr-ink);
+    padding: 0 12px;
+    min-height: 0;
+  }
+  .bar {
+    background: var(--pwr-cream);
+    display: flex; flex-direction: column; justify-content: flex-start;
+    align-items: center;
+    padding: 18px 8px 0;
+    position: relative;
+    min-height: 60px;
+  }
+  .bar.win { background: var(--pwr-red); }
+  .bar.win .bar-val { color: var(--pwr-on-red); }
+  .bar.win::after {
+    content: "★"; position: absolute; top: -52px; left: 50%;
+    transform: translateX(-50%);
+    color: var(--pwr-red); font-size: 36px;
+  }
+  .bar-val {
+    font-family: var(--font-mono); font-size: 26px; font-weight: 600;
+    color: var(--pwr-red-d); text-align: center;
+  }
+  .bar-labels {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    gap: 28px; padding: 14px 12px 0;
+  }
+  .bar-label {
+    text-align: center; font-family: var(--font-mono);
+    font-size: 24px; color: var(--pwr-muted); letter-spacing: 0.04em;
+  }
+  .chart-side { display: flex; flex-direction: column; gap: 28px; justify-content: center;
+                padding-left: 28px; border-left: 4px solid var(--pwr-cream); }
+  .chart-callout-num { font-family: var(--font-display); font-size: 120px;
+                       font-weight: 700; color: var(--pwr-red); line-height: 0.9;
+                       letter-spacing: -0.04em; margin: 0; }
+  .chart-callout-lbl { font-family: var(--font-sans); font-size: 26px;
+                       color: var(--pwr-ink); line-height: 1.3; margin: 0; font-weight: 500; }
+  .chart-side ul { list-style: none; margin: 8px 0 0; padding: 0; }
+  .chart-side ul li {
+    font-size: 24px; line-height: 1.4; color: var(--pwr-muted);
+    padding: 12px 0; border-top: 1px solid var(--pwr-hair);
+    display: grid; grid-template-columns: 24px 1fr; gap: 12px;
+  }
+  .chart-side ul li::before { content: "→"; color: var(--pwr-red); font-family: var(--font-mono); }
+  .chart-y-axis {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    display: flex; flex-direction: column; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 22px; color: var(--pwr-muted);
+    padding: 12px 0;
+  }
+
+  /* ─── Image grid ─────────────────────────────────────────────────── */
+  .img-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr;
+              gap: 24px; flex: 1; min-height: 0; }
+  .img-tile { display: flex; flex-direction: column; background: var(--pwr-cream-l);
+              border: 1px solid var(--pwr-hair); min-height: 0; }
+  .img-tile-frame { flex: 1; min-height: 0; overflow: hidden; }
+  .img-tile image-slot { width: 100%; height: 100%; display: block; }
+  .img-tile-cap {
+    padding: 14px 18px; font-family: var(--font-mono); font-size: 24px;
+    color: var(--pwr-muted); border-top: 1px solid var(--pwr-hair);
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .img-tile-cap .pos { color: var(--pwr-red); font-weight: 600; }
+  .img-tile-cap .neg { color: var(--pwr-muted); }
+
+  /* ─── Contributions (numbered claim cards) ───────────────────────── */
+  ol.claims { margin: 0; padding: 0; list-style: none;
+              display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px;
+              flex: 1; align-items: stretch; }
+  ol.claims li {
+    display: flex; flex-direction: column; gap: 18px;
+    padding: 36px 32px 32px;
+    background: var(--pwr-bg);
+    border-top: 6px solid var(--pwr-red);
+    box-shadow: 0 0 0 1px var(--pwr-hair);
+    position: relative;
+  }
+  ol.claims .idx {
+    font-family: var(--font-display); font-size: 96px;
+    font-weight: 700; color: var(--pwr-red); line-height: 0.9;
+    letter-spacing: -0.04em; margin: 0 0 8px 0;
+  }
+  ol.claims .claim-h { font-size: 34px; font-weight: 700; line-height: 1.15;
+                       color: var(--pwr-ink); margin: 0; text-wrap: balance; }
+  ol.claims .claim-d { font-size: 24px; line-height: 1.4; color: var(--pwr-muted);
+                       margin: 0; }
+  ol.claims .claim-tag {
+    font-family: var(--font-mono); font-size: 24px;
+    color: var(--pwr-red-d); margin-top: auto;
+    padding-top: 14px; border-top: 1px dashed var(--pwr-hair);
+  }
+  body.dark ol.claims li { background: #1f1d1b; box-shadow: 0 0 0 1px var(--pwr-hair); }
+
+  /* ─── Limitations ────────────────────────────────────────────────── */
+  ul.limits { margin: 0; padding: 0; list-style: none; }
+  ul.limits li {
+    display: grid; grid-template-columns: 56px 1fr 360px;
+    gap: 32px; align-items: center;
+    padding: 24px 0;
+    border-top: 1px solid var(--pwr-hair);
+  }
+  ul.limits li:last-child { border-bottom: 1px solid var(--pwr-hair); }
+  ul.limits .lim-sign {
+    font-family: var(--font-mono); font-size: 32px; font-weight: 600;
+    color: var(--pwr-red);
+  }
+  ul.limits .lim-h { font-size: 30px; font-weight: 700; margin: 0 0 6px 0; color: var(--pwr-ink); }
+  ul.limits .lim-d { font-size: 24px; line-height: 1.4; color: var(--pwr-muted); margin: 0; }
+  ul.limits .lim-fix {
+    background: var(--pwr-cream-l);
+    padding: 16px 20px; border-left: 4px solid var(--pwr-red);
+    font-size: 24px; line-height: 1.35; color: var(--pwr-ink);
+  }
+  ul.limits .lim-fix b {
+    font-family: var(--font-sans); font-size: 24px;
+    color: var(--pwr-red); letter-spacing: 0.12em;
+    text-transform: uppercase; font-weight: 700;
+    display: block; margin-bottom: 4px;
+  }
+
+  /* ─── Acknowledgements ───────────────────────────────────────────── */
+  .ack-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 64px; flex: 1; min-height: 0; }
+  .ack-col { display: flex; flex-direction: column; gap: 16px;
+             padding-top: 24px; border-top: 4px solid var(--pwr-red); }
+  .ack-tag { font-family: var(--font-sans); font-size: 24px; letter-spacing: 0.14em;
+             text-transform: uppercase; color: var(--pwr-red); font-weight: 700; }
+  .ack-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+  .ack-col li { font-size: 28px; line-height: 1.3; color: var(--pwr-ink); font-weight: 500; }
+  .ack-col li .role { display: block; font-size: 24px; color: var(--pwr-muted); margin-top: 4px; font-weight: 400; }
+  .ack-col li .grant { display: block; font-family: var(--font-mono); font-size: 24px;
+                       color: var(--pwr-muted); margin-top: 4px; }
+
+  /* ─── Backup / Appendix divider (dark variant) ───────────────────── */
+  section.slide.divider.divider-dark {
+    background: var(--pwr-ink);
+  }
+  section.slide.divider.divider-dark .rail { border-bottom-color: rgba(241, 209, 162, 0.18); }
+  section.slide.divider.divider-dark .divider-num { color: rgba(241, 209, 162, 0.10); }
+  section.slide.divider.divider-dark .divider-title { color: var(--pwr-cream); }
+  section.slide.divider.divider-dark .divider-eyebrow { color: rgba(241, 209, 162, 0.7); }
+  section.slide.divider.divider-dark .divider-rule { background: var(--pwr-cream); }
+  section.slide.divider.divider-dark .divider-lede { color: rgba(241, 209, 162, 0.7); }
+  section.slide.divider.divider-dark .divider-foot { color: rgba(241, 209, 162, 0.55); }
+
+  /* ─── Bullet style tweak ─────────────────────────────────────────── */
+  body.bullets-square ul.bullets li::before { transform: none; }
+  body.bullets-dash ul.bullets li::before {
+    width: 28px; height: 4px; margin-top: 22px; transform: none;
+  }
+
+
+</style>
+
+<script type="application/json" id="speaker-notes">
+[
+  "Cover. Introduce yourself, topic, unit. ~30s.",
+  "Agenda. Walk through the six sections and the time budget.",
+  "Definition. Frame what a GNN is in one breath before any math.",
+  "Section divider — Background.",
+  "Background. Three structural reasons standard models fail on molecules.",
+  "Motivation quote. Read slowly, connect to our contribution in one sentence.",
+  "Domain context. Where this work sits — drug-like molecules ≤ 50 atoms.",
+  "Section divider — Method.",
+  "Pipeline. Walk left to right, ~15 seconds per step.",
+  "Two-column comparison. Lead with the one structural difference that matters.",
+  "Three families. Spectral / spatial / attention — we live in spatial.",
+  "Equation. Read it left-to-right. Then point at MEAN — that's what makes it permutation invariant.",
+  "Pseudocode. Don't read line by line; point at the three notes on the side.",
+  "Headline stat. Read it, say what it means, say what it does NOT mean.",
+  "Chart. ClinTox is the biggest win; SIDER is the stubborn loss.",
+  "Full results table. Point at one row, not all of them. Highlighted = best.",
+  "Architecture figure. Walk through data flow.",
+  "Qualitative samples. Two failures (sucrose, insulin fragment) keep this honest.",
+  "Contributions. Three claims, each tied to an ablation section.",
+  "Limitations. Be honest. Show what you did about each one.",
+  "Schedule. Where we are now and what comes next.",
+  "Acknowledgements. Read the names; do not read grant numbers.",
+  "References. Acknowledge — do not read aloud.",
+  "Q&A. Thank the audience, repeat your contact line, invite questions.",
+  "Appendix divider. Only navigate here if asked. Detailed hyperparameters & extra figures live in backup."
+]
+</script>
+</head>
+<body class="lang-en">
+
+<deck-stage width="1920" height="1080">
+
+  <!-- ═══ 01 · Cover ═════════════════════════════════════════════════ -->
+  <section class="slide cover" data-label="01 Cover">
+    <div class="cover-left">
+      <div class="cover-brand">
+        <div class="pwr-mark">
+          <img class="lang-en" src="assets/uni/pwr-en-horiz.png" alt="Wrocław University of Science and Technology" />
+          <img class="lang-pl" src="assets/uni/pwr-pl-horiz.png" alt="Politechnika Wrocławska" />
+        </div>
+        <div class="unit-line">
+          <span class="i18n" data-en="Faculty of Information &amp; Communication Technology"
+                              data-pl="Wydział Informatyki i Telekomunikacji">Faculty of Information &amp; Communication Technology</span>
+        </div>
+      </div>
+
+      <div class="cover-title-block">
+        <h1 class="cover-title">
+          <span class="i18n" data-en="Graph Neural Networks for"
+                              data-pl="Grafowe sieci neuronowe w">Graph Neural Networks for</span>
+          <em class="i18n" data-en="Molecular Property Prediction"
+                            data-pl="predykcji właściwości molekuł">Molecular Property Prediction</em>
+        </h1>
+        <p class="cover-sub">
+          <span class="i18n" data-en="A survey of message-passing architectures and their performance on the MoleculeNet benchmark suite."
+                              data-pl="Przegląd architektur z wymianą wiadomości i ich wyników na zbiorze MoleculeNet.">A survey of message-passing architectures and their performance on the MoleculeNet benchmark suite.</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="cover-right">
+      <div class="pwr-eagle">
+        <img class="lang-en" src="assets/uni/pwr-en-vert-white.png" alt="Wrocław University of Science and Technology" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-vert-white.png" alt="Politechnika Wrocławska" />
+      </div>
+      <dl class="meta-block">
+        <div>
+          <dt><span class="i18n" data-en="Speaker" data-pl="Prelegent">Speaker</span></dt>
+          <dd>Your Name</dd>
+        </div>
+        <div>
+          <dt><span class="i18n" data-en="Advisor" data-pl="Promotor">Advisor</span></dt>
+          <dd>
+            <span class="i18n" data-en="Prof. A. Example, PhD, DSc"
+                                data-pl="prof. A. Przykład, dr hab. inż.">Prof. A. Example, PhD, DSc</span>
+          </dd>
+        </div>
+        <div>
+          <dt><span class="i18n" data-en="Date · Venue" data-pl="Data · Miejsce">Date · Venue</span></dt>
+          <dd>
+            <span class="i18n" data-en="17 May 2026 · Bldg. C-16, room 1.30"
+                                data-pl="17 maja 2026 · Bud. C-16, sala 1.30">17 May 2026 · Bldg. C-16, room 1.30</span>
+          </dd>
+        </div>
+        <div>
+          <dt><span class="i18n" data-en="Programme" data-pl="Program">Programme</span></dt>
+          <dd>
+            <span class="i18n" data-en="MSc Seminar · CS 7340 · WS 2026/27"
+                                data-pl="Seminarium magisterskie · CS 7340 · WS 2026/27">MSc Seminar · CS 7340 · WS 2026/27</span>
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="cover-strip">
+      <div class="copy">
+        © 2026 <span class="i18n" data-en="Wrocław University of Science and Technology"
+                                   data-pl="Politechnika Wrocławska">Wrocław University of Science and Technology</span> · pwr.edu.pl
+      </div>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="HR Excellence in Research" />
+        <span class="sep"></span>
+        <img src="assets/uni/unite.png" alt="Unite! — University Network for Innovation, Technology and Engineering" />
+        <span class="sep"></span>
+        <img src="assets/uni/iep-evaluated.png" alt="Evaluated by IEP — Institutional Evaluation Programme" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 02 · Agenda ════════════════════════════════════════════════ -->
+  <section class="slide" data-label="02 Agenda">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="Wrocław University of Science and Technology" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="Politechnika Wrocławska" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Agenda" data-pl="Plan prezentacji">Agenda</span></div>
+      <div class="meta">02 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="Outline" data-pl="Plan">Outline</span></div>
+        <h2 class="title">
+          <span class="i18n" data-en="Six sections, thirty minutes"
+                              data-pl="Sześć sekcji, trzydzieści minut">Six sections, thirty minutes</span>
+        </h2>
+        <div class="title-rule"></div>
+      </div>
+
+      <ol class="agenda">
+        <li>
+          <span class="idx">01</span>
+          <span class="label"><span class="i18n" data-en="Background" data-pl="Wprowadzenie">Background</span></span>
+          <span class="dur">5 min</span>
+        </li>
+        <li>
+          <span class="idx">02</span>
+          <span class="label"><span class="i18n" data-en="Method" data-pl="Metoda">Method</span></span>
+          <span class="dur">8 min</span>
+        </li>
+        <li>
+          <span class="idx">03</span>
+          <span class="label"><span class="i18n" data-en="Experimental setup" data-pl="Konfiguracja eksperymentu">Experimental setup</span></span>
+          <span class="dur">4 min</span>
+        </li>
+        <li>
+          <span class="idx">04</span>
+          <span class="label"><span class="i18n" data-en="Results" data-pl="Wyniki">Results</span></span>
+          <span class="dur">7 min</span>
+        </li>
+        <li>
+          <span class="idx">05</span>
+          <span class="label"><span class="i18n" data-en="Discussion" data-pl="Dyskusja">Discussion</span></span>
+          <span class="dur">3 min</span>
+        </li>
+        <li>
+          <span class="idx">06</span>
+          <span class="label"><span class="i18n" data-en="Next steps &amp; Q&amp;A" data-pl="Dalsze kroki i pytania">Next steps &amp; Q&amp;A</span></span>
+          <span class="dur">3 min</span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">02 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+  
+  <!-- ═══ 03 · Definition ════════════════════════════════════════════ -->
+  <section class="slide" data-label="03 Background · Definition">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Background · Key concept" data-pl="Wprowadzenie · Kluczowe pojęcie">Background · Key concept</span></div>
+      <div class="meta">03 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="Key concept" data-pl="Kluczowe pojęcie">Key concept</span></div>
+        <h2 class="title"><span class="i18n" data-en="What is a graph neural network?" data-pl="Czym jest grafowa sieć neuronowa?">What is a graph neural network?</span></h2>
+        <div class="title-rule"></div>
+      </div>
+
+      <div class="def-grid">
+        <div class="def-card">
+          <div class="def-tag"><span class="i18n" data-en="Definition" data-pl="Definicja">Definition</span></div>
+          <h3 class="def-term"><span class="i18n" data-en="Graph Neural Network" data-pl="Grafowa sieć neuronowa">Graph Neural Network</span></h3>
+          <p class="def-notation">f<sub>θ</sub> : 𝒢 → ℝ<sup>d</sup></p>
+          <p class="def-body">
+            <span class="i18n" data-en="A neural network whose forward pass operates directly on a graph G = (V, E). Its output is invariant to vertex relabelling — the model sees the same molecule no matter which atom is numbered first."
+                                data-pl="Sieć neuronowa, której przebieg w przód działa bezpośrednio na grafie G = (V, E). Wyjście jest niezmiennicze na permutację wierzchołków — model widzi tę samą cząsteczkę niezależnie od numeracji atomów.">A neural network whose forward pass operates directly on a graph G = (V, E). Its output is invariant to vertex relabelling — the model sees the same molecule no matter which atom is numbered first.</span>
+          </p>
+        </div>
+        <div>
+          <div class="def-side-h"><span class="i18n" data-en="In practice" data-pl="W praktyce">In practice</span></div>
+          <ul class="bullets" style="margin-top: 8px;">
+            <li>
+              <div>
+                <span class="b-title"><span class="i18n" data-en="Permutation-invariant by construction." data-pl="Niezmiennicza permutacyjnie z definicji.">Permutation-invariant by construction.</span></span>
+                <span class="b-desc"><span class="i18n" data-en="Reordering atoms does not change the prediction; symmetry is baked into the architecture." data-pl="Zmiana kolejności atomów nie zmienia predykcji; symetria jest wbudowana w architekturę.">Reordering atoms does not change the prediction; symmetry is baked into the architecture.</span></span>
+              </div>
+            </li>
+            <li>
+              <div>
+                <span class="b-title"><span class="i18n" data-en="Local message passing, then global readout." data-pl="Lokalna wymiana wiadomości, potem agregacja globalna.">Local message passing, then global readout.</span></span>
+                <span class="b-desc"><span class="i18n" data-en="Each node first mixes information with its neighbours, then a pooling step collapses the graph into a single vector." data-pl="Każdy wierzchołek najpierw miesza informacje z sąsiadami, potem pooling zwija graf do pojedynczego wektora.">Each node first mixes information with its neighbours, then a pooling step collapses the graph into a single vector.</span></span>
+              </div>
+            </li>
+            <li>
+              <div>
+                <span class="b-title"><span class="i18n" data-en="End-to-end trainable." data-pl="Trening end-to-end.">End-to-end trainable.</span></span>
+                <span class="b-desc"><span class="i18n" data-en="Gradients flow from the prediction back to the atomic embeddings; no hand-engineered features in the middle." data-pl="Gradienty płyną od predykcji do osadzeń atomów; bez ręcznie projektowanych cech pośrodku.">Gradients flow from the prediction back to the atomic embeddings; no hand-engineered features in the middle.</span></span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">03 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+<!-- ═══ 04 · Section divider — Background ═════════════════════════ -->
+  <section class="slide divider" data-label="04 Section · Background">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Section 01" data-pl="Sekcja 01">Section 01</span></div>
+      <div class="meta">04 / 25</div>
+    </div>
+
+    <div class="body-area">
+      <div class="divider-num">01</div>
+      <div class="divider-block">
+        <div class="divider-eyebrow"><span class="i18n" data-en="Section" data-pl="Sekcja">Section</span></div>
+        <h2 class="divider-title"><span class="i18n" data-en="Background" data-pl="Wprowadzenie">Background</span></h2>
+        <div class="divider-rule"></div>
+        <p class="divider-lede">
+          <span class="i18n" data-en="Why molecular property prediction is hard, and where graphs come in."
+                              data-pl="Dlaczego predykcja właściwości molekuł jest trudna i jaką rolę odgrywają grafy.">Why molecular property prediction is hard, and where graphs come in.</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="divider-foot">
+      <span><span class="i18n" data-en="Section 01 of 03" data-pl="Sekcja 01 z 03">Section 01 of 03</span></span>
+      <span><span class="i18n" data-en="~6 minutes" data-pl="~6 minut">~6 minutes</span></span>
+    </div>
+  </section>
+
+  <!-- ═══ 05 · Background · Text + bullets ═══════════════════════════ -->
+  <section class="slide" data-label="05 Background · Problem">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Background · Problem framing"
+                                                data-pl="Wprowadzenie · Sformułowanie problemu">Background · Problem framing</span></div>
+      <div class="meta">05 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="01 — Background" data-pl="01 — Wprowadzenie">01 — Background</span></div>
+        <h2 class="title">
+          <span class="i18n" data-en="Problem framing" data-pl="Sformułowanie problemu">Problem framing</span>
+        </h2>
+        <div class="title-rule"></div>
+        <p class="subtitle">
+          <span class="i18n" data-en="Three properties of molecular data make it a poor fit for standard sequence and vector models."
+                              data-pl="Trzy cechy danych molekularnych sprawiają, że standardowe modele sekwencyjne i wektorowe są niewłaściwe.">Three properties of molecular data make it a poor fit for standard sequence and vector models.</span>
+        </p>
+      </div>
+
+      <ul class="bullets">
+        <li>
+          <div>
+            <span class="b-title"><span class="i18n" data-en="Variable, irregular structure."
+                                                      data-pl="Zmienna, nieregularna struktura.">Variable, irregular structure.</span></span>
+            <span class="b-desc"><span class="i18n" data-en="A molecule has no canonical ordering of atoms. Any model that imposes one inherits a symmetry it doesn't have."
+                                                     data-pl="Cząsteczka nie ma kanonicznego uporządkowania atomów. Każdy model wymuszający porządek zakłada symetrię, której nie posiada.">A molecule has no canonical ordering of atoms. Any model that imposes one inherits a symmetry it doesn't have.</span></span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <span class="b-title"><span class="i18n" data-en="Locality with long-range effects."
+                                                      data-pl="Lokalność z efektami dalekiego zasięgu.">Locality with long-range effects.</span></span>
+            <span class="b-desc"><span class="i18n" data-en="Most chemistry is local — bonds and immediate neighbours — but a handful of properties depend on whole-molecule context."
+                                                     data-pl="Chemia jest w większości lokalna — wiązania i bezpośredni sąsiedzi — ale niektóre właściwości zależą od kontekstu całej cząsteczki.">Most chemistry is local — bonds and immediate neighbours — but a handful of properties depend on whole-molecule context.</span></span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <span class="b-title"><span class="i18n" data-en="Small, noisy labelled datasets."
+                                                      data-pl="Małe, zaszumione zbiory etykietowane.">Small, noisy labelled datasets.</span></span>
+            <span class="b-desc"><span class="i18n" data-en="Wet-lab measurements are expensive. Most public benchmarks are in the 1k–40k range, with non-trivial label noise."
+                                                     data-pl="Pomiary laboratoryjne są kosztowne. Większość publicznych zbiorów ma 1k–40k przykładów z niezerowym szumem etykiet.">Wet-lab measurements are expensive. Most public benchmarks are in the 1k–40k range, with non-trivial label noise.</span></span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">05 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 06 · Big quote ═════════════════════════════════════════════ -->
+  <section class="slide" data-label="06 Motivation · Quote">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Background · Motivation" data-pl="Wprowadzenie · Motywacja">Background · Motivation</span></div>
+      <div class="meta">06 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="quote">
+        <div class="mark">“</div>
+        <p class="body">
+          <span class="i18n" data-en="A molecule is the smallest object on which graph structure and 3D geometry are inseparable — and yet most predictors choose one and discard the other."
+                              data-pl="Cząsteczka to najmniejszy obiekt, w którym struktura grafowa i geometria 3D są nierozdzielne — a mimo to większość modeli wybiera jedno i odrzuca drugie.">A molecule is the smallest object on which graph structure and 3D geometry are inseparable — and yet most predictors choose one and discard the other.</span>
+        </p>
+        <div class="attr">
+          <span class="name">P. Battaglia et al.</span>
+          <span>·</span>
+          <span class="ref">Relational inductive biases, deep learning, and graph networks</span>
+          <span>·</span>
+          <span>2018</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">06 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+  
+  <!-- ═══ 07 · Full-bleed context ════════════════════════════════════ -->
+  <section class="slide bleed" data-label="07 Background · Domain context">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Background · Domain context" data-pl="Wprowadzenie · Kontekst dziedziny">Background · Domain context</span></div>
+      <div class="meta">07 / 25</div>
+    </div>
+
+    <div class="bleed-img">
+      <image-slot id="bleed-context" shape="rect" placeholder="Drop a domain photo here (lab, molecules, scaling)"></image-slot>
+    </div>
+    <div class="bleed-shade"></div>
+    <div class="bleed-cred"><span class="i18n" data-en="PHOTO · DROP HERO IMAGE" data-pl="ZDJĘCIE · WSTAW OBRAZ TŁA">PHOTO · DROP HERO IMAGE</span></div>
+
+    <div class="bleed-content">
+      <div class="bleed-eye"><span class="i18n" data-en="Domain context" data-pl="Kontekst dziedziny">Domain context</span></div>
+      <h2 class="bleed-title"><span class="i18n" data-en="Drug-like molecules live in a regime where GNNs are tractable."
+                                                  data-pl="Cząsteczki lekopodobne mieszczą się w zakresie, w którym GNN są wykonalne.">Drug-like molecules live in a regime where GNNs are tractable.</span></h2>
+      <p class="bleed-sub"><span class="i18n" data-en="≤ 50 heavy atoms per molecule covers roughly 90% of FDA-approved small-molecule drugs — small enough for full-graph message passing without subsampling tricks."
+                                                data-pl="≤ 50 ciężkich atomów na cząsteczkę pokrywa ok. 90% leków małocząsteczkowych zatwierdzonych przez FDA — wystarczająco mało, by stosować pełną wymianę wiadomości bez próbkowania.">≤ 50 heavy atoms per molecule covers roughly 90% of FDA-approved small-molecule drugs — small enough for full-graph message passing without subsampling tricks.</span></p>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">07 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+<!-- ═══ 08 · Section divider — Method ═════════════════════════════ -->
+  <section class="slide divider" data-label="08 Section · Method">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Section 02" data-pl="Sekcja 02">Section 02</span></div>
+      <div class="meta">08 / 25</div>
+    </div>
+
+    <div class="body-area">
+      <div class="divider-num">02</div>
+      <div class="divider-block">
+        <div class="divider-eyebrow"><span class="i18n" data-en="Section" data-pl="Sekcja">Section</span></div>
+        <h2 class="divider-title"><span class="i18n" data-en="Method" data-pl="Metoda">Method</span></h2>
+        <div class="divider-rule"></div>
+        <p class="divider-lede">
+          <span class="i18n" data-en="Message passing, readout, and the family of architectures we'll compare."
+                              data-pl="Wymiana wiadomości, agregacja i rodzina porównywanych architektur.">Message passing, readout, and the family of architectures we'll compare.</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="divider-foot">
+      <span><span class="i18n" data-en="Section 02 of 03" data-pl="Sekcja 02 z 03">Section 02 of 03</span></span>
+      <span><span class="i18n" data-en="~10 minutes" data-pl="~10 minut">~10 minutes</span></span>
+    </div>
+  </section>
+
+  <!-- ═══ 09 · Pipeline ══════════════════════════════════════════════ -->
+  <section class="slide" data-label="09 Method · Pipeline">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Method · Training pipeline"
+                                                data-pl="Metoda · Pipeline treningu">Method · Training pipeline</span></div>
+      <div class="meta">09 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="02 — Method" data-pl="02 — Metoda">02 — Method</span></div>
+        <h2 class="title"><span class="i18n" data-en="Training pipeline" data-pl="Pipeline treningu">Training pipeline</span></h2>
+        <div class="title-rule"></div>
+        <p class="subtitle">
+          <span class="i18n" data-en="Five stages, end to end — from SMILES string to predicted property."
+                              data-pl="Pięć etapów end-to-end — od łańcucha SMILES do przewidzianej właściwości.">Five stages, end to end — from SMILES string to predicted property.</span>
+        </p>
+      </div>
+
+      <div class="pipeline">
+        <div class="step">
+          <div class="step-idx">01</div>
+          <h3 class="step-h">SMILES → <span class="i18n" data-en="graph" data-pl="graf">graph</span></h3>
+          <p class="step-d"><span class="i18n" data-en="Parse SMILES with RDKit. Atoms become nodes; bonds become typed edges."
+                                                data-pl="Parsowanie SMILES w RDKit. Atomy stają się wierzchołkami; wiązania — typowanymi krawędziami.">Parse SMILES with RDKit. Atoms become nodes; bonds become typed edges.</span></p>
+          <div class="step-tag">rdkit · 0.4s / 1k</div>
+        </div>
+        <div class="step">
+          <div class="step-idx">02</div>
+          <h3 class="step-h"><span class="i18n" data-en="Featurise" data-pl="Cechy">Featurise</span></h3>
+          <p class="step-d"><span class="i18n" data-en="Atomic number, charge, hybridisation, aromaticity. 32-d node, 8-d edge."
+                                                data-pl="Liczba atomowa, ładunek, hybrydyzacja, aromatyczność. Wierzch. 32-d, krawędź 8-d.">Atomic number, charge, hybridisation, aromaticity. 32-d node, 8-d edge.</span></p>
+          <div class="step-tag">node 32 · edge 8</div>
+        </div>
+        <div class="step">
+          <div class="step-idx">03</div>
+          <h3 class="step-h"><span class="i18n" data-en="Message passing" data-pl="Wymiana wiadomości">Message passing</span></h3>
+          <p class="step-d"><span class="i18n" data-en="Four rounds of GINE, GAT or MPNN. Residual + LayerNorm between rounds."
+                                                data-pl="Cztery rundy GINE, GAT lub MPNN. Połączenia rezydualne + LayerNorm między rundami.">Four rounds of GINE, GAT or MPNN. Residual + LayerNorm between rounds.</span></p>
+          <div class="step-tag">4 layers · h=256</div>
+        </div>
+        <div class="step">
+          <div class="step-idx">04</div>
+          <h3 class="step-h"><span class="i18n" data-en="Readout" data-pl="Agregacja">Readout</span></h3>
+          <p class="step-d"><span class="i18n" data-en="Set2Set pooling over node embeddings into a single graph vector."
+                                                data-pl="Pooling Set2Set po osadzeniach wierzchołków do pojedynczego wektora grafu.">Set2Set pooling over node embeddings into a single graph vector.</span></p>
+          <div class="step-tag">set2set · k=6</div>
+        </div>
+        <div class="step">
+          <div class="step-idx">05</div>
+          <h3 class="step-h"><span class="i18n" data-en="Predict" data-pl="Predykcja">Predict</span></h3>
+          <p class="step-d"><span class="i18n" data-en="Two-layer MLP head. Cross-entropy or smooth L1 depending on the target."
+                                                data-pl="Dwuwarstwowa głowica MLP. Entropia krzyżowa lub smooth L1 w zależności od zadania.">Two-layer MLP head. Cross-entropy or smooth L1 depending on the target.</span></p>
+          <div class="step-tag">mlp · 256 → 1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">09 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 10 · Comparison ════════════════════════════════════════════ -->
+  <section class="slide" data-label="10 Method · Comparison">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Method · Related work"
+                                                data-pl="Metoda · Prace pokrewne">Method · Related work</span></div>
+      <div class="meta">10 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="02 — Method" data-pl="02 — Metoda">02 — Method</span></div>
+        <h2 class="title"><span class="i18n" data-en="Related approaches"
+                                              data-pl="Podejścia pokrewne">Related approaches</span></h2>
+        <div class="title-rule"></div>
+      </div>
+
+      <div class="cols">
+        <div class="compare">
+          <div class="compare-tag">A · <span class="i18n" data-en="Fingerprint baseline" data-pl="Bazowy fingerprint">Fingerprint baseline</span></div>
+          <h3 class="compare-h">
+            <span class="i18n" data-en="Random forests on Morgan fingerprints."
+                                data-pl="Lasy losowe na fingerprintach Morgana.">Random forests on Morgan fingerprints.</span>
+          </h3>
+          <p class="compare-body">
+            <span class="i18n" data-en="Hand-engineered substructure counts feed a tree ensemble. Fast, interpretable, surprisingly hard to beat on small datasets."
+                                data-pl="Ręcznie dobrane zliczenia podstruktur trafiają do zespołu drzew. Szybkie, interpretowalne, trudne do pokonania na małych zbiorach.">Hand-engineered substructure counts feed a tree ensemble. Fast, interpretable, surprisingly hard to beat on small datasets.</span>
+          </p>
+          <ul class="compare-list">
+            <li><span class="i18n" data-en="Trains in seconds; no GPU required."
+                                    data-pl="Trening w sekundach; bez GPU.">Trains in seconds; no GPU required.</span></li>
+            <li><span class="i18n" data-en="Fixed feature set — cannot specialise."
+                                    data-pl="Stały zbiór cech — brak specjalizacji.">Fixed feature set — cannot specialise.</span></li>
+            <li><span class="i18n" data-en="Strong floor on classification tasks."
+                                    data-pl="Mocna baza dla zadań klasyfikacyjnych.">Strong floor on classification tasks.</span></li>
+          </ul>
+        </div>
+        <div class="compare alt">
+          <div class="compare-tag">B · <span class="i18n" data-en="Graph neural network" data-pl="Grafowa sieć neuronowa">Graph neural network</span></div>
+          <h3 class="compare-h">
+            <span class="i18n" data-en="Message passing over the molecular graph."
+                                data-pl="Wymiana wiadomości po grafie cząsteczki.">Message passing over the molecular graph.</span>
+          </h3>
+          <p class="compare-body">
+            <span class="i18n" data-en="Node and edge embeddings are learned end-to-end from labels. Representations adapt to the target property."
+                                data-pl="Osadzenia wierzchołków i krawędzi uczone end-to-end z etykiet. Reprezentacje dopasowują się do zadania.">Node and edge embeddings are learned end-to-end from labels. Representations adapt to the target property.</span>
+          </p>
+          <ul class="compare-list">
+            <li><span class="i18n" data-en="Permutation invariant by construction."
+                                    data-pl="Z założenia niezmiennicze na permutacje.">Permutation invariant by construction.</span></li>
+            <li><span class="i18n" data-en="Scales to multi-task &amp; pretraining setups."
+                                    data-pl="Skaluje się do wielozadaniowości i pretreningu.">Scales to multi-task &amp; pretraining setups.</span></li>
+            <li><span class="i18n" data-en="Needs &gt; 5k examples to clearly separate."
+                                    data-pl="Wymaga &gt; 5k przykładów, by wyraźnie wygrać.">Needs &gt; 5k examples to clearly separate.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">10 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+  
+  <!-- ═══ 11 · Three-column family overview ════════════════════════════ -->
+  <section class="slide" data-label="11 Method · Three families">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Method · Family overview" data-pl="Metoda · Rodziny modeli">Method · Family overview</span></div>
+      <div class="meta">11 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="02 — Method" data-pl="02 — Metoda">02 — Method</span></div>
+        <h2 class="title"><span class="i18n" data-en="Three families of graph neural networks"
+                                              data-pl="Trzy rodziny grafowych sieci neuronowych">Three families of graph neural networks</span></h2>
+        <div class="title-rule"></div>
+      </div>
+
+      <div class="cols-3">
+        <div class="compare">
+          <div class="compare-tag">A · <span class="i18n" data-en="Spectral" data-pl="Spektralne">Spectral</span></div>
+          <h3 class="compare-h"><span class="i18n" data-en="Filters in the Laplacian eigenbasis."
+                                                    data-pl="Filtry w bazie własnej laplasjanu.">Filters in the Laplacian eigenbasis.</span></h3>
+          <p class="compare-body"><span class="i18n" data-en="ChebNet, GCN, and friends. Theoretically clean; expensive to transfer across graphs of different size."
+                                                      data-pl="ChebNet, GCN itp. Teoretycznie eleganckie; trudny transfer między grafami o różnym rozmiarze.">ChebNet, GCN, and friends. Theoretically clean; expensive to transfer across graphs of different size.</span></p>
+          <ul class="compare-list">
+            <li><span class="i18n" data-en="Strong theoretical grounding." data-pl="Mocne podstawy teoretyczne.">Strong theoretical grounding.</span></li>
+            <li><span class="i18n" data-en="Cost scales with graph size." data-pl="Koszt rośnie z rozmiarem grafu.">Cost scales with graph size.</span></li>
+            <li><span class="i18n" data-en="Mostly historical in chemistry." data-pl="W chemii głównie historyczne.">Mostly historical in chemistry.</span></li>
+          </ul>
+        </div>
+        <div class="compare alt">
+          <div class="compare-tag">B · <span class="i18n" data-en="Spatial (message passing)" data-pl="Przestrzenne (wymiana wiadomości)">Spatial (message passing)</span></div>
+          <h3 class="compare-h"><span class="i18n" data-en="Aggregates from each node's local neighbourhood."
+                                                    data-pl="Agreguje z lokalnego sąsiedztwa wierzchołka.">Aggregates from each node's local neighbourhood.</span></h3>
+          <p class="compare-body"><span class="i18n" data-en="MPNN, GINE, GraphSAGE. The mainstream choice for molecular tasks today — strong inductive bias matched to chemistry."
+                                                      data-pl="MPNN, GINE, GraphSAGE. Główny wybór dla zadań molekularnych dziś — induktywne założenia pasują do chemii.">MPNN, GINE, GraphSAGE. The mainstream choice for molecular tasks today — strong inductive bias matched to chemistry.</span></p>
+          <ul class="compare-list">
+            <li><span class="i18n" data-en="Permutation-invariant by construction." data-pl="Niezmiennicza permutacyjnie z definicji.">Permutation-invariant by construction.</span></li>
+            <li><span class="i18n" data-en="Best accuracy / cost for ≤ 100-atom graphs." data-pl="Najlepsza relacja jakości do kosztu dla grafów ≤ 100 atomów.">Best accuracy / cost for ≤ 100-atom graphs.</span></li>
+            <li><span class="i18n" data-en="What our experiments compare." data-pl="To porównujemy w naszych eksperymentach.">What our experiments compare.</span></li>
+          </ul>
+        </div>
+        <div class="compare">
+          <div class="compare-tag">C · <span class="i18n" data-en="Attention-based" data-pl="Oparte na uwadze">Attention-based</span></div>
+          <h3 class="compare-h"><span class="i18n" data-en="Each node learns how to weight its neighbours."
+                                                    data-pl="Każdy wierzchołek uczy się wag dla sąsiadów.">Each node learns how to weight its neighbours.</span></h3>
+          <p class="compare-body"><span class="i18n" data-en="GAT, Graph Transformers (GraphGPS). Heavier per step; payoff is task-dependent."
+                                                      data-pl="GAT, transformery grafowe (GraphGPS). Droższe na krok; opłacalność zależy od zadania.">GAT, Graph Transformers (GraphGPS). Heavier per step; payoff is task-dependent.</span></p>
+          <ul class="compare-list">
+            <li><span class="i18n" data-en="Captures heterogeneous neighbours." data-pl="Dobrze radzi sobie z heterogenicznym sąsiedztwem.">Captures heterogeneous neighbours.</span></li>
+            <li><span class="i18n" data-en="Quadratic in neighbourhood size." data-pl="Kwadratowy w rozmiarze sąsiedztwa.">Quadratic in neighbourhood size.</span></li>
+            <li><span class="i18n" data-en="Promising for large-graph regimes." data-pl="Obiecujące dla dużych grafów.">Promising for large-graph regimes.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">11 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ 12 · Equation showcase ════════════════════════════════════ -->
+  <section class="slide" data-label="12 Method · Update rule">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Method · Update rule" data-pl="Metoda · Reguła aktualizacji">Method · Update rule</span></div>
+      <div class="meta">12 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="02 — Method" data-pl="02 — Metoda">02 — Method</span></div>
+        <h2 class="title"><span class="i18n" data-en="The message-passing update"
+                                              data-pl="Aktualizacja w wymianie wiadomości">The message-passing update</span></h2>
+        <div class="title-rule"></div>
+      </div>
+
+      <div class="eq-grid">
+        <div class="eq-display">
+          <p class="eq">
+            <span class="var">h</span><sub><span class="var">v</span></sub><sup>(<span class="var">l</span>+1)</sup>
+            <span class="op">=</span>
+            <span class="fn">σ</span>
+            <span class="paren">(</span>
+            <span class="var">W</span><sup>(<span class="var">l</span>)</sup>
+            <span class="op">·</span>
+            <span class="agg">MEAN</span><sub><span class="var">u</span> ∈ 𝒩(<span class="var">v</span>) ∪ {<span class="var">v</span>}</sub>
+            <span class="paren">(</span>
+            <span class="var">h</span><sub><span class="var">u</span></sub><sup>(<span class="var">l</span>)</sup>
+            <span class="paren">)</span>
+            <span class="paren">)</span>
+          </p>
+          <p class="eq-cap"><span class="i18n" data-en="Applied l = 0 … L−1 times to produce the final node embeddings."
+                                                data-pl="Stosowane l = 0 … L−1 razy, by uzyskać końcowe osadzenia wierzchołków.">Applied l = 0 … L−1 times to produce the final node embeddings.</span></p>
+        </div>
+
+        <dl class="eq-vars">
+          <div>
+            <dt>h<sub>v</sub><sup>(l)</sup></dt>
+            <dd><span class="i18n" data-en="Embedding of node v at layer l." data-pl="Osadzenie wierzchołka v na warstwie l.">Embedding of node v at layer l.</span></dd>
+          </div>
+          <div>
+            <dt>𝒩(v)</dt>
+            <dd><span class="i18n" data-en="One-hop neighbourhood of v." data-pl="Sąsiedztwo 1-hop wierzchołka v.">One-hop neighbourhood of v.</span></dd>
+          </div>
+          <div>
+            <dt>W<sup>(l)</sup></dt>
+            <dd><span class="i18n" data-en="Learnable weights at layer l." data-pl="Uczone wagi na warstwie l.">Learnable weights at layer l.</span></dd>
+          </div>
+          <div>
+            <dt>σ</dt>
+            <dd><span class="i18n" data-en="Non-linearity (we use ReLU)." data-pl="Nieliniowość (używamy ReLU).">Non-linearity (we use ReLU).</span></dd>
+          </div>
+          <div>
+            <dt>MEAN</dt>
+            <dd><span class="i18n" data-en="Permutation-invariant aggregator." data-pl="Agregator niezmienniczy permutacyjnie.">Permutation-invariant aggregator.</span></dd>
+          </div>
+          <div>
+            <dt>L</dt>
+            <dd><span class="i18n" data-en="Total number of layers (L = 4)." data-pl="Liczba warstw (L = 4).">Total number of layers (L = 4).</span></dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">12 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ 13 · Code / pseudocode ════════════════════════════════════ -->
+  <section class="slide" data-label="13 Method · Pseudocode">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Method · Pseudocode" data-pl="Metoda · Pseudokod">Method · Pseudocode</span></div>
+      <div class="meta">13 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="02 — Method" data-pl="02 — Metoda">02 — Method</span></div>
+        <h2 class="title"><span class="i18n" data-en="Forward pass" data-pl="Przebieg w przód">Forward pass</span></h2>
+        <div class="title-rule"></div>
+      </div>
+
+      <div class="code-grid">
+        <div class="code-block">
+          <div class="filename">
+            <span>forward_pass.py</span>
+            <span><span class="i18n" data-en="48 lines · python" data-pl="48 linii · python">48 lines · python</span></span>
+          </div>
+          <div class="line"><span class="ln">1</span><span><span class="kw">def</span> <span class="fn">forward</span>(self, batch):</span></div>
+          <div class="line"><span class="ln">2</span><span><span class="ind"></span><span class="cm"># 1. atom &amp; bond features → embeddings</span></span></div>
+          <div class="line"><span class="ln">3</span><span><span class="ind"></span>h = self.atom_embed(batch.x)</span></div>
+          <div class="line"><span class="ln">4</span><span><span class="ind"></span>e = self.bond_embed(batch.edge_attr)</span></div>
+          <div class="line blank"><span class="ln"></span><span></span></div>
+          <div class="line"><span class="ln">6</span><span><span class="ind"></span><span class="cm"># 2. L rounds of message passing</span></span></div>
+          <div class="line"><span class="ln">7</span><span><span class="ind"></span><span class="kw">for</span> layer <span class="kw">in</span> self.layers:</span></div>
+          <div class="line"><span class="ln">8</span><span><span class="ind"></span><span class="ind"></span>h_new = layer(h, batch.edge_index, e)</span></div>
+          <div class="line"><span class="ln">9</span><span><span class="ind"></span><span class="ind"></span>h = self.norm(h + h_new) <span class="cm"># residual</span></span></div>
+          <div class="line blank"><span class="ln"></span><span></span></div>
+          <div class="line"><span class="ln">11</span><span><span class="ind"></span><span class="cm"># 3. set2set readout → graph vector</span></span></div>
+          <div class="line"><span class="ln">12</span><span><span class="ind"></span>g = self.readout(h, batch.batch)</span></div>
+          <div class="line blank"><span class="ln"></span><span></span></div>
+          <div class="line"><span class="ln">14</span><span><span class="ind"></span><span class="cm"># 4. MLP head → property</span></span></div>
+          <div class="line"><span class="ln">15</span><span><span class="ind"></span><span class="kw">return</span> self.head(g)</span></div>
+        </div>
+
+        <div class="code-notes">
+          <div class="code-note">
+            <h4><span class="i18n" data-en="Initial embeddings" data-pl="Osadzenia początkowe">Initial embeddings</span></h4>
+            <p><span class="i18n" data-en="Each atom is mapped to a learned 32-d vector from atomic number, charge, hybridisation, aromaticity."
+                                    data-pl="Każdy atom mapowany do uczonego wektora 32-d na podstawie liczby atomowej, ładunku, hybrydyzacji i aromatyczności.">Each atom is mapped to a learned 32-d vector from atomic number, charge, hybridisation, aromaticity.</span></p>
+          </div>
+          <div class="code-note">
+            <h4><span class="i18n" data-en="Message rounds" data-pl="Rundy wiadomości">Message rounds</span></h4>
+            <p><span class="i18n" data-en="Four GINE-edge layers. Residual + LayerNorm keep the deeper stack stable during training."
+                                    data-pl="Cztery warstwy GINE-edge. Połączenia rezydualne + LayerNorm stabilizują głębszy stos.">Four GINE-edge layers. Residual + LayerNorm keep the deeper stack stable during training.</span></p>
+          </div>
+          <div class="code-note">
+            <h4><span class="i18n" data-en="Readout & predict" data-pl="Agregacja i predykcja">Readout &amp; predict</span></h4>
+            <p><span class="i18n" data-en="Set2Set pools per-node embeddings into one graph vector; a two-layer MLP head outputs the property."
+                                    data-pl="Set2Set łączy osadzenia wierzchołków w jeden wektor grafu; dwuwarstwowy MLP daje predykcję.">Set2Set pools per-node embeddings into one graph vector; a two-layer MLP head outputs the property.</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">13 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+<!-- ═══ 14 · Big stat ══════════════════════════════════════════════ -->
+  <section class="slide" data-label="14 Results · Headline">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Results · Headline" data-pl="Wyniki · Najważniejsze">Results · Headline</span></div>
+      <div class="meta">14 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stat-row">
+        <div>
+          <p class="big-num">+8.4<span class="unit">%</span></p>
+        </div>
+        <div class="stat-side">
+          <div class="stat-label">
+            <span class="i18n" data-en="Mean ROC-AUC · 6 datasets"
+                                data-pl="Średnie ROC-AUC · 6 zbiorów">Mean ROC-AUC · 6 datasets</span>
+          </div>
+          <p class="stat-desc">
+            <span class="i18n" data-en="Average improvement of the best GNN variant over the fingerprint baseline, across the MoleculeNet classification suite."
+                                data-pl="Średnia poprawa najlepszego wariantu GNN nad fingerprintem na zbiorach klasyfikacyjnych MoleculeNet.">Average improvement of the best GNN variant over the fingerprint baseline, across the MoleculeNet classification suite.</span>
+          </p>
+          <div class="stat-foot">
+            <span class="i18n" data-en="Reported on scaffold splits · 5 seeds · 95% CI ±1.1%"
+                                data-pl="Podział scaffold · 5 ziaren · CI 95% ±1.1%">Reported on scaffold splits · 5 seeds · 95% CI ±1.1%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">14 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+  
+  <!-- ═══ 15 · Chart ════════════════════════════════════════════════ -->
+  <section class="slide" data-label="15 Results · Per-dataset chart">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Results · Per-dataset" data-pl="Wyniki · Wg zbiorów">Results · Per-dataset</span></div>
+      <div class="meta">15 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="03 — Results" data-pl="03 — Wyniki">03 — Results</span></div>
+        <h2 class="title"><span class="i18n" data-en="ROC-AUC per dataset" data-pl="ROC-AUC wg zbiorów">ROC-AUC per dataset</span></h2>
+        <div class="title-rule"></div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="bar-chart">
+          <div class="bars-row">
+            <div class="bar"     style="height: 77%;"><span class="bar-val">0.77</span></div>
+            <div class="bar"     style="height: 83%;"><span class="bar-val">0.83</span></div>
+            <div class="bar"     style="height: 64%;"><span class="bar-val">0.64</span></div>
+            <div class="bar win" style="height: 91%;"><span class="bar-val">0.91</span></div>
+            <div class="bar"     style="height: 80%;"><span class="bar-val">0.80</span></div>
+            <div class="bar"     style="height: 87%;"><span class="bar-val">0.87</span></div>
+          </div>
+          <div class="bar-labels">
+            <span class="bar-label">BBBP</span>
+            <span class="bar-label">Tox21</span>
+            <span class="bar-label">SIDER</span>
+            <span class="bar-label">ClinTox</span>
+            <span class="bar-label">HIV</span>
+            <span class="bar-label">BACE</span>
+          </div>
+        </div>
+
+        <div class="chart-side">
+          <p class="chart-callout-num">4 / 6</p>
+          <p class="chart-callout-lbl"><span class="i18n" data-en="datasets where GINE wins outright"
+                                                            data-pl="zbiorów, na których GINE wygrywa bezspornie">datasets where GINE wins outright</span></p>
+          <ul>
+            <li><span class="i18n" data-en="ClinTox is the largest single-dataset gain (+0.081)."
+                                    data-pl="ClinTox to największy pojedynczy zysk (+0,081).">ClinTox is the largest single-dataset gain (+0.081).</span></li>
+            <li><span class="i18n" data-en="SIDER remains the hardest — too small, too noisy."
+                                    data-pl="SIDER pozostaje najtrudniejszy — za mały, za zaszumiony.">SIDER remains the hardest — too small, too noisy.</span></li>
+            <li><span class="i18n" data-en="Variance across seeds is below ±0.012 on every dataset."
+                                    data-pl="Wariancja po ziarnach < ±0,012 na każdym zbiorze.">Variance across seeds is below ±0.012 on every dataset.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">15 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+<!-- ═══ 16 · Table ═════════════════════════════════════════════════ -->
+  <section class="slide" data-label="16 Results · Table">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Results · Full numbers"
+                                                data-pl="Wyniki · Pełne liczby">Results · Full numbers</span></div>
+      <div class="meta">16 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="03 — Results" data-pl="03 — Wyniki">03 — Results</span></div>
+        <h2 class="title"><span class="i18n" data-en="Quantitative results"
+                                              data-pl="Wyniki ilościowe">Quantitative results</span></h2>
+        <div class="title-rule"></div>
+      </div>
+
+      <table class="data">
+        <thead>
+          <tr>
+            <th><span class="i18n" data-en="Dataset" data-pl="Zbiór">Dataset</span></th>
+            <th class="num"><span class="i18n" data-en="Size" data-pl="Rozmiar">Size</span></th>
+            <th class="num">RF + Morgan</th>
+            <th class="num">GAT</th>
+            <th class="num">MPNN</th>
+            <th class="num">GINE</th>
+            <th class="num">Δ <span class="i18n" data-en="vs." data-pl="vs.">vs.</span> RF</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="best">
+            <td>BBBP</td>
+            <td class="num">2,039</td>
+            <td class="num">0.712</td>
+            <td class="num">0.741</td>
+            <td class="num">0.738</td>
+            <td class="num">0.769</td>
+            <td class="num delta-pos">+0.057</td>
+          </tr>
+          <tr>
+            <td>Tox21</td>
+            <td class="num">7,831</td>
+            <td class="num">0.795</td>
+            <td class="num">0.812</td>
+            <td class="num">0.824</td>
+            <td class="num">0.829</td>
+            <td class="num delta-pos">+0.034</td>
+          </tr>
+          <tr>
+            <td>SIDER</td>
+            <td class="num">1,427</td>
+            <td class="num">0.624</td>
+            <td class="num">0.617</td>
+            <td class="num">0.631</td>
+            <td class="num">0.642</td>
+            <td class="num delta-pos">+0.018</td>
+          </tr>
+          <tr class="best">
+            <td>ClinTox</td>
+            <td class="num">1,478</td>
+            <td class="num">0.832</td>
+            <td class="num">0.886</td>
+            <td class="num">0.891</td>
+            <td class="num">0.913</td>
+            <td class="num delta-pos">+0.081</td>
+          </tr>
+          <tr class="best">
+            <td>HIV</td>
+            <td class="num">41,127</td>
+            <td class="num">0.768</td>
+            <td class="num">0.782</td>
+            <td class="num">0.791</td>
+            <td class="num">0.803</td>
+            <td class="num delta-pos">+0.035</td>
+          </tr>
+          <tr class="best">
+            <td>BACE</td>
+            <td class="num">1,513</td>
+            <td class="num">0.811</td>
+            <td class="num">0.844</td>
+            <td class="num">0.851</td>
+            <td class="num">0.872</td>
+            <td class="num delta-pos">+0.061</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-cap">
+        <span class="i18n" data-en="ROC-AUC, higher is better · scaffold split · mean over 5 seeds · highlighted rows differ from baseline by &gt; 1 σ."
+                            data-pl="ROC-AUC, wyżej = lepiej · podział scaffold · średnia po 5 ziarnach · wyróżnione wiersze różnią się od bazy o &gt; 1 σ.">ROC-AUC, higher is better · scaffold split · mean over 5 seeds · highlighted rows differ from baseline by &gt; 1 σ.</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">16 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 17 · Image-led ═════════════════════════════════════════════ -->
+  <section class="slide" data-label="17 Results · Architecture">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Results · Model architecture"
+                                                data-pl="Wyniki · Architektura modelu">Results · Model architecture</span></div>
+      <div class="meta">17 / 25</div>
+    </div>
+
+    <div class="content image-led">
+      <div class="stack-tight" style="justify-content: center;">
+        <div class="eyebrow"><span class="i18n" data-en="03 — Results" data-pl="03 — Wyniki">03 — Results</span></div>
+        <h2 class="title"><span class="i18n" data-en="Architecture" data-pl="Architektura">Architecture</span></h2>
+        <div class="title-rule"></div>
+        <p class="subtitle" style="margin-top: 16px;">
+          <span class="i18n" data-en="The schematic shows the GINE variant with edge-feature augmentation and a Set2Set readout head."
+                              data-pl="Schemat pokazuje wariant GINE z augmentacją cech krawędzi i głowicą Set2Set.">The schematic shows the GINE variant with edge-feature augmentation and a Set2Set readout head.</span>
+        </p>
+        <div class="caption-row">
+          <span class="ref">FIG. 1</span>
+          <span>GINE-edge · Set2Set readout</span>
+        </div>
+      </div>
+      <div class="image-frame">
+        <image-slot id="fig-architecture-uni" shape="rect"
+                    placeholder="Drop your architecture diagram here"></image-slot>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">17 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+  
+  <!-- ═══ 18 · Image grid ══════════════════════════════════════════════ -->
+  <section class="slide" data-label="18 Results · Qualitative">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Results · Qualitative samples" data-pl="Wyniki · Próbki jakościowe">Results · Qualitative samples</span></div>
+      <div class="meta">18 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="03 — Results" data-pl="03 — Wyniki">03 — Results</span></div>
+        <h2 class="title"><span class="i18n" data-en="Sample predictions on BBBP"
+                                              data-pl="Przykładowe predykcje na BBBP">Sample predictions on BBBP</span></h2>
+        <div class="title-rule"></div>
+      </div>
+
+      <div class="img-grid">
+        <div class="img-tile">
+          <div class="img-tile-frame"><image-slot id="qual-1" shape="rect" placeholder="Sample 1"></image-slot></div>
+          <div class="img-tile-cap"><span>caffeine</span><span class="pos">+ 0.94</span></div>
+        </div>
+        <div class="img-tile">
+          <div class="img-tile-frame"><image-slot id="qual-2" shape="rect" placeholder="Sample 2"></image-slot></div>
+          <div class="img-tile-cap"><span>ibuprofen</span><span class="pos">+ 0.88</span></div>
+        </div>
+        <div class="img-tile">
+          <div class="img-tile-frame"><image-slot id="qual-3" shape="rect" placeholder="Sample 3"></image-slot></div>
+          <div class="img-tile-cap"><span>aspirin</span><span class="pos">+ 0.81</span></div>
+        </div>
+        <div class="img-tile">
+          <div class="img-tile-frame"><image-slot id="qual-4" shape="rect" placeholder="Sample 4"></image-slot></div>
+          <div class="img-tile-cap"><span>sucrose</span><span class="neg">− 0.12</span></div>
+        </div>
+        <div class="img-tile">
+          <div class="img-tile-frame"><image-slot id="qual-5" shape="rect" placeholder="Sample 5"></image-slot></div>
+          <div class="img-tile-cap"><span>insulin frag.</span><span class="neg">− 0.34</span></div>
+        </div>
+        <div class="img-tile">
+          <div class="img-tile-frame"><image-slot id="qual-6" shape="rect" placeholder="Sample 6"></image-slot></div>
+          <div class="img-tile-cap"><span>penicillin G</span><span class="pos">+ 0.71</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">18 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ 19 · Contributions ════════════════════════════════════════ -->
+  <section class="slide" data-label="19 Discussion · Contributions">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Discussion · Contributions" data-pl="Dyskusja · Wkład">Discussion · Contributions</span></div>
+      <div class="meta">19 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="04 — Discussion" data-pl="04 — Dyskusja">04 — Discussion</span></div>
+        <h2 class="title"><span class="i18n" data-en="Contributions" data-pl="Wkład pracy">Contributions</span></h2>
+        <div class="title-rule"></div>
+        <p class="subtitle"><span class="i18n" data-en="What this work adds — three claims, each backed by an ablation."
+                                                data-pl="Co wnosi ta praca — trzy stwierdzenia, każde poparte ablacją.">What this work adds — three claims, each backed by an ablation.</span></p>
+      </div>
+
+      <ol class="claims">
+        <li>
+          <span class="idx">01</span>
+          <h3 class="claim-h"><span class="i18n" data-en="Edge-feature augmentation gives a consistent +6% on small datasets."
+                                                  data-pl="Augmentacja cech krawędzi daje stały +6% na małych zbiorach.">Edge-feature augmentation gives a consistent +6% on small datasets.</span></h3>
+          <p class="claim-d"><span class="i18n" data-en="Bond type, stereochemistry, and ring membership added as 8-d edge features outperform vanilla GINE on BBBP, ClinTox, BACE."
+                                                  data-pl="Typ wiązania, stereochemia i przynależność do pierścienia jako 8-d cechy krawędzi pokonują GINE na BBBP, ClinTox, BACE.">Bond type, stereochemistry, and ring membership added as 8-d edge features outperform vanilla GINE on BBBP, ClinTox, BACE.</span></p>
+          <div class="claim-tag">→ <span class="i18n" data-en="Ablation: §4.2" data-pl="Ablacja: §4.2">Ablation: §4.2</span></div>
+        </li>
+        <li>
+          <span class="idx">02</span>
+          <h3 class="claim-h"><span class="i18n" data-en="Set2Set readout beats sum pooling on every benchmark."
+                                                  data-pl="Set2Set wygrywa z sumą na każdym benchmarku.">Set2Set readout beats sum pooling on every benchmark.</span></h3>
+          <p class="claim-d"><span class="i18n" data-en="Mean improvement +2.1 points; gap widens on datasets where molecule size varies more across examples."
+                                                  data-pl="Średnia poprawa +2,1 pkt; różnica rośnie tam, gdzie rozmiar cząsteczek zmienia się bardziej między przykładami.">Mean improvement +2.1 points; gap widens on datasets where molecule size varies more across examples.</span></p>
+          <div class="claim-tag">→ <span class="i18n" data-en="Ablation: §4.3" data-pl="Ablacja: §4.3">Ablation: §4.3</span></div>
+        </li>
+        <li>
+          <span class="idx">03</span>
+          <h3 class="claim-h"><span class="i18n" data-en="3D coordinates are unnecessary when edge features are rich enough."
+                                                  data-pl="Współrzędne 3D są zbędne, gdy cechy krawędzi są wystarczająco bogate.">3D coordinates are unnecessary when edge features are rich enough.</span></h3>
+          <p class="claim-d"><span class="i18n" data-en="Adding atomic coordinates as input gives less than 0.4-point lift and adds substantial preprocessing cost."
+                                                  data-pl="Dodanie współrzędnych atomowych daje mniej niż 0,4 pkt poprawy przy znacznym koszcie preprocessingu.">Adding atomic coordinates as input gives less than 0.4-point lift and adds substantial preprocessing cost.</span></p>
+          <div class="claim-tag">→ <span class="i18n" data-en="Ablation: §4.4" data-pl="Ablacja: §4.4">Ablation: §4.4</span></div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">19 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ 20 · Limitations ════════════════════════════════════════════ -->
+  <section class="slide" data-label="20 Discussion · Limitations">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Discussion · Limitations" data-pl="Dyskusja · Ograniczenia">Discussion · Limitations</span></div>
+      <div class="meta">20 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="04 — Discussion" data-pl="04 — Dyskusja">04 — Discussion</span></div>
+        <h2 class="title"><span class="i18n" data-en="Limitations & threats to validity"
+                                              data-pl="Ograniczenia i zagrożenia walidacji">Limitations &amp; threats to validity</span></h2>
+        <div class="title-rule"></div>
+      </div>
+
+      <ul class="limits">
+        <li>
+          <span class="lim-sign">!</span>
+          <div>
+            <h3 class="lim-h"><span class="i18n" data-en="One scaffold split per dataset."
+                                                  data-pl="Jeden podział scaffold na zbiór.">One scaffold split per dataset.</span></h3>
+            <p class="lim-d"><span class="i18n" data-en="Scaffold splits are sensitive to which scaffolds end up in train vs. test."
+                                                  data-pl="Podziały scaffold zależą od tego, które scaffoldy trafią do treningu i testu.">Scaffold splits are sensitive to which scaffolds end up in train vs. test.</span></p>
+          </div>
+          <div class="lim-fix">
+            <b><span class="i18n" data-en="What we did" data-pl="Co zrobiliśmy">What we did</span></b>
+            <span class="i18n" data-en="Repeated across 5 seeds and 2 alternative splits in the ablation."
+                                data-pl="Powtórzone na 5 ziarnach i 2 alternatywnych podziałach w ablacji.">Repeated across 5 seeds and 2 alternative splits in the ablation.</span>
+          </div>
+        </li>
+        <li>
+          <span class="lim-sign">!</span>
+          <div>
+            <h3 class="lim-h"><span class="i18n" data-en="Only classification benchmarks."
+                                                  data-pl="Tylko benchmarki klasyfikacji.">Only classification benchmarks.</span></h3>
+            <p class="lim-d"><span class="i18n" data-en="Results may not transfer to regression targets like solubility or binding affinity."
+                                                  data-pl="Wyniki mogą nie przenieść się na cele regresji, np. rozpuszczalność czy powinowactwo wiązania.">Results may not transfer to regression targets like solubility or binding affinity.</span></p>
+          </div>
+          <div class="lim-fix">
+            <b><span class="i18n" data-en="Next" data-pl="Dalej">Next</span></b>
+            <span class="i18n" data-en="Regression analogue (FreeSolv, ESOL) planned for the thesis."
+                                data-pl="Analogiczna regresja (FreeSolv, ESOL) zaplanowana w pracy.">Regression analogue (FreeSolv, ESOL) planned for the thesis.</span>
+          </div>
+        </li>
+        <li>
+          <span class="lim-sign">!</span>
+          <div>
+            <h3 class="lim-h"><span class="i18n" data-en="No external validation set."
+                                                  data-pl="Brak zewnętrznego zbioru walidacyjnego.">No external validation set.</span></h3>
+            <p class="lim-d"><span class="i18n" data-en="MoleculeNet has been the field benchmark since 2018 — overfitting to it is plausible."
+                                                  data-pl="MoleculeNet jest benchmarkiem od 2018 — przeuczenie do niego jest możliwe.">MoleculeNet has been the field benchmark since 2018 — overfitting to it is plausible.</span></p>
+          </div>
+          <div class="lim-fix">
+            <b><span class="i18n" data-en="Mitigation" data-pl="Mitygacja">Mitigation</span></b>
+            <span class="i18n" data-en="Held-out 2024 ChEMBL release planned for September."
+                                data-pl="Wstrzymany podzbiór z wydania ChEMBL 2024 zaplanowany na wrzesień.">Held-out 2024 ChEMBL release planned for September.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">20 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+<!-- ═══ 21 · Timeline ══════════════════════════════════════════════ -->
+  <section class="slide" data-label="21 Plan · Timeline">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Plan · Schedule" data-pl="Plan · Harmonogram">Plan · Schedule</span></div>
+      <div class="meta">21 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="Thesis plan" data-pl="Plan pracy">Thesis plan</span></div>
+        <h2 class="title"><span class="i18n" data-en="Schedule" data-pl="Harmonogram">Schedule</span></h2>
+        <div class="title-rule"></div>
+        <p class="subtitle">
+          <span class="i18n" data-en="Six months from now to defence — three milestones along the way."
+                              data-pl="Sześć miesięcy do obrony — trzy kamienie milowe po drodze.">Six months from now to defence — three milestones along the way.</span>
+        </p>
+      </div>
+
+      <div class="timeline">
+        <div class="tl-col">
+          <div class="tl-month"><span class="i18n" data-en="May 2026" data-pl="Maj 2026">May 2026</span></div>
+          <span class="tl-pill"><span class="i18n" data-en="Literature" data-pl="Literatura">Literature</span></span>
+          <p class="tl-note">
+            <span class="i18n" data-en="Survey of message-passing variants and pretraining objectives."
+                                data-pl="Przegląd wariantów wymiany wiadomości i celów pretreningu.">Survey of message-passing variants and pretraining objectives.</span>
+          </p>
+        </div>
+        <div class="tl-col">
+          <div class="tl-month"><span class="i18n" data-en="Jun 2026" data-pl="Cze 2026">Jun 2026</span></div>
+          <span class="tl-pill"><span class="i18n" data-en="Baselines" data-pl="Bazy">Baselines</span></span>
+          <p class="tl-note">
+            <span class="i18n" data-en="Reproduce RF + Morgan and the three GNNs on MoleculeNet."
+                                data-pl="Reprodukcja RF + Morgan oraz trzech GNN na MoleculeNet.">Reproduce RF + Morgan and the three GNNs on MoleculeNet.</span>
+          </p>
+        </div>
+        <div class="tl-col alt">
+          <div class="tl-month"><span class="i18n" data-en="Jul – Aug 2026" data-pl="Lip – Sie 2026">Jul – Aug 2026</span></div>
+          <span class="tl-pill alt"><span class="i18n" data-en="Method ★" data-pl="Metoda ★">Method ★</span></span>
+          <p class="tl-note">
+            <span class="i18n" data-en="Edge-feature augmentation; 3D coordinate input as an ablation."
+                                data-pl="Augmentacja cech krawędzi; wejście 3D jako ablacja.">Edge-feature augmentation; 3D coordinate input as an ablation.</span>
+          </p>
+        </div>
+        <div class="tl-col">
+          <div class="tl-month"><span class="i18n" data-en="Sep 2026" data-pl="Wrz 2026">Sep 2026</span></div>
+          <span class="tl-pill"><span class="i18n" data-en="Experiments" data-pl="Eksperymenty">Experiments</span></span>
+          <p class="tl-note">
+            <span class="i18n" data-en="Sweep over four splits and five seeds; ablations on readout."
+                                data-pl="Sweep po czterech podziałach i pięciu ziarnach; ablacje agregacji.">Sweep over four splits and five seeds; ablations on readout.</span>
+          </p>
+        </div>
+        <div class="tl-col alt">
+          <div class="tl-month"><span class="i18n" data-en="Oct 2026" data-pl="Paź 2026">Oct 2026</span></div>
+          <span class="tl-pill alt"><span class="i18n" data-en="Writing ★" data-pl="Pisanie ★">Writing ★</span></span>
+          <p class="tl-note">
+            <span class="i18n" data-en="Thesis draft. Iterate with advisor on framing and figures."
+                                data-pl="Szkic pracy. Iteracje z promotorem nad strukturą i rysunkami.">Thesis draft. Iterate with advisor on framing and figures.</span>
+          </p>
+        </div>
+        <div class="tl-col">
+          <div class="tl-month"><span class="i18n" data-en="Nov 2026" data-pl="Lis 2026">Nov 2026</span></div>
+          <span class="tl-pill"><span class="i18n" data-en="Defence" data-pl="Obrona">Defence</span></span>
+          <p class="tl-note">
+            <span class="i18n" data-en="Submission, mock defence, and final presentation."
+                                data-pl="Złożenie pracy, obrona próbna, prezentacja końcowa.">Submission, mock defence, and final presentation.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">21 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+  
+  <!-- ═══ 22 · Acknowledgements ════════════════════════════════════════ -->
+  <section class="slide" data-label="22 Acknowledgements">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Acknowledgements" data-pl="Podziękowania">Acknowledgements</span></div>
+      <div class="meta">22 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="Thanks" data-pl="Podziękowania">Thanks</span></div>
+        <h2 class="title"><span class="i18n" data-en="Acknowledgements" data-pl="Podziękowania">Acknowledgements</span></h2>
+        <div class="title-rule"></div>
+      </div>
+
+      <div class="ack-grid">
+        <div class="ack-col">
+          <div class="ack-tag"><span class="i18n" data-en="People" data-pl="Osoby">People</span></div>
+          <ul>
+            <li>Prof. A. Example
+              <span class="role"><span class="i18n" data-en="Advisor" data-pl="Promotor">Advisor</span></span>
+            </li>
+            <li>Dr B. Co-author
+              <span class="role"><span class="i18n" data-en="Co-author & second reader" data-pl="Współautor i drugi recenzent">Co-author &amp; second reader</span></span>
+            </li>
+            <li>
+              <span class="i18n" data-en="GNN Reading Group" data-pl="Koło naukowe GNN">GNN Reading Group</span>
+              <span class="role"><span class="i18n" data-en="Weekly feedback, sharper hypotheses" data-pl="Cotygodniowy feedback, lepsze hipotezy">Weekly feedback, sharper hypotheses</span></span>
+            </li>
+          </ul>
+        </div>
+        <div class="ack-col">
+          <div class="ack-tag"><span class="i18n" data-en="Funding" data-pl="Finansowanie">Funding</span></div>
+          <ul>
+            <li>
+              <span class="i18n" data-en="National Science Centre, Poland" data-pl="Narodowe Centrum Nauki">National Science Centre, Poland</span>
+              <span class="grant">NCN OPUS · 2023/49/B/ST6/00000</span>
+            </li>
+            <li>
+              <span class="i18n" data-en="W4 Faculty seed grant" data-pl="Grant rozruchowy W4">W4 Faculty seed grant</span>
+              <span class="grant">PWr · 8202022 / 2025</span>
+            </li>
+          </ul>
+        </div>
+        <div class="ack-col">
+          <div class="ack-tag"><span class="i18n" data-en="Resources" data-pl="Zasoby">Resources</span></div>
+          <ul>
+            <li>PLGrid HPC
+              <span class="role">Athena cluster · 2 × A100 weeks</span>
+            </li>
+            <li>MoleculeNet
+              <span class="role">Wu et al. 2018</span>
+            </li>
+            <li>RDKit · PyG · PyTorch
+              <span class="role"><span class="i18n" data-en="Open-source maintainers" data-pl="Społeczność open-source">Open-source maintainers</span></span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">22 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+<!-- ═══ 23 · References ════════════════════════════════════════════ -->
+  <section class="slide" data-label="23 References">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="References" data-pl="Bibliografia">References</span></div>
+      <div class="meta">23 / 25</div>
+    </div>
+
+    <div class="content">
+      <div class="stack-tight">
+        <div class="eyebrow"><span class="i18n" data-en="Sources" data-pl="Źródła">Sources</span></div>
+        <h2 class="title"><span class="i18n" data-en="References" data-pl="Bibliografia">References</span></h2>
+        <div class="title-rule"></div>
+      </div>
+
+      <ol class="refs">
+        <li>
+          <span class="ref-idx">[1]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Gilmer J., Schoenholz S., Riley P., Vinyals O., Dahl G.</span>
+            Neural message passing for quantum chemistry. <span class="ref-venue">ICML</span>, 2017.
+            <span class="ref-doi">arXiv:1704.01212</span>
+          </div>
+        </li>
+        <li>
+          <span class="ref-idx">[2]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Hu W., Liu B., Gomes J., et al.</span>
+            Strategies for pre-training graph neural networks. <span class="ref-venue">ICLR</span>, 2020.
+            <span class="ref-doi">arXiv:1905.12265</span>
+          </div>
+        </li>
+        <li>
+          <span class="ref-idx">[3]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Wu Z., Ramsundar B., Feinberg E., et al.</span>
+            MoleculeNet: a benchmark for molecular machine learning. <span class="ref-venue">Chem. Sci.</span>, 2018.
+            <span class="ref-doi">doi:10.1039/C7SC02664A</span>
+          </div>
+        </li>
+        <li>
+          <span class="ref-idx">[4]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Xu K., Hu W., Leskovec J., Jegelka S.</span>
+            How powerful are graph neural networks? <span class="ref-venue">ICLR</span>, 2019.
+            <span class="ref-doi">arXiv:1810.00826</span>
+          </div>
+        </li>
+        <li>
+          <span class="ref-idx">[5]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Battaglia P., Hamrick J., Bapst V., et al.</span>
+            Relational inductive biases, deep learning, and graph networks. <span class="ref-venue">arXiv preprint</span>, 2018.
+            <span class="ref-doi">arXiv:1806.01261</span>
+          </div>
+        </li>
+        <li>
+          <span class="ref-idx">[6]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Veličković P., Cucurull G., Casanova A., et al.</span>
+            Graph attention networks. <span class="ref-venue">ICLR</span>, 2018.
+            <span class="ref-doi">arXiv:1710.10903</span>
+          </div>
+        </li>
+        <li>
+          <span class="ref-idx">[7]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Yang K., Swanson K., Jin W., et al.</span>
+            Analyzing learned molecular representations for property prediction. <span class="ref-venue">JCIM</span>, 2019.
+            <span class="ref-doi">doi:10.1021/acs.jcim.9b00237</span>
+          </div>
+        </li>
+        <li>
+          <span class="ref-idx">[8]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Klicpera J., Groß J., Günnemann S.</span>
+            Directional message passing for molecular graphs. <span class="ref-venue">ICLR</span>, 2020.
+            <span class="ref-doi">arXiv:2003.03123</span>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="footer">
+      <span class="speaker">Your Name</span>
+      <span class="page">23 / 25</span>
+      <div class="partners">
+        <img src="assets/uni/hr-excellence.png" alt="" />
+        <img src="assets/uni/unite.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 24 · Q&A ═══════════════════════════════════════════════════ -->
+  <section class="slide qa" data-label="24 Q&amp;A">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Thank you" data-pl="Dziękuję">Thank you</span></div>
+      <div class="meta">24 / 25</div>
+    </div>
+
+    <div class="qa-mid">
+      <div class="qa-eye"><span class="i18n" data-en="End of talk" data-pl="Koniec prezentacji">End of talk</span></div>
+      <h2 class="qa-h"><span class="i18n" data-en="Questions?" data-pl="Pytania?">Questions?</span></h2>
+      <p class="qa-sub">
+        <span class="i18n" data-en="Happy to dig into any of the architectures, the experimental setup, or where the next twelve weeks are going."
+                            data-pl="Chętnie omówię wybraną architekturę, konfigurację eksperymentu lub plan na najbliższe dwanaście tygodni.">Happy to dig into any of the architectures, the experimental setup, or where the next twelve weeks are going.</span>
+      </p>
+    </div>
+
+    <dl class="qa-bottom">
+      <div>
+        <dt><span class="i18n" data-en="Contact" data-pl="Kontakt">Contact</span></dt>
+        <dd>your.name@pwr.edu.pl</dd>
+      </div>
+      <div>
+        <dt><span class="i18n" data-en="Code &amp; data" data-pl="Kod i dane">Code &amp; data</span></dt>
+        <dd>github.com/yourname/gnn-mol</dd>
+      </div>
+      <div>
+        <dt><span class="i18n" data-en="Slides" data-pl="Slajdy">Slides</span></dt>
+        <dd>kbase.pwr.edu.pl/seminar</dd>
+      </div>
+    </dl>
+  </section>
+
+
+  <!-- ═══ 25 · Appendix divider ════════════════════════════════════════ -->
+  <section class="slide divider divider-dark" data-label="25 Appendix">
+    <div class="rail">
+      <div class="lockup">
+        <img class="lang-en" src="assets/uni/pwr-en-horiz-white.png" alt="" />
+        <img class="lang-pl" src="assets/uni/pwr-pl-horiz-white.png" alt="" />
+      </div>
+      <div class="title-mid"><span class="i18n" data-en="Backup material" data-pl="Materiały dodatkowe">Backup material</span></div>
+      <div class="meta">25 / 25</div>
+    </div>
+
+    <div class="body-area">
+      <div class="divider-num">A</div>
+      <div class="divider-block">
+        <div class="divider-eyebrow"><span class="i18n" data-en="If we have time" data-pl="Jeśli będzie czas">If we have time</span></div>
+        <h2 class="divider-title"><span class="i18n" data-en="Appendix" data-pl="Materiały dodatkowe">Appendix</span></h2>
+        <div class="divider-rule"></div>
+        <p class="divider-lede"><span class="i18n" data-en="Hyperparameters, ablation curves, hardware notes, and the full set of qualitative samples — happy to walk through any of them."
+                                                    data-pl="Hiperparametry, krzywe ablacji, notatki sprzętowe i pełne próbki jakościowe — chętnie omówię dowolne.">Hyperparameters, ablation curves, hardware notes, and the full set of qualitative samples — happy to walk through any of them.</span></p>
+      </div>
+    </div>
+
+    <div class="divider-foot">
+      <span><span class="i18n" data-en="Backup material" data-pl="Materiał zapasowy">Backup material</span></span>
+      <span>25 / 25</span>
+    </div>
+  </section>
+
+</deck-stage>
+
+<!-- ─── i18n: swap textContent on lang change ────────────────────── -->
+<script id="i18n">
+  (function() {
+    function applyLang(lang) {
+      const key = lang === 'pl' ? 'pl' : 'en';
+      document.body.classList.toggle('lang-en', key === 'en');
+      document.body.classList.toggle('lang-pl', key === 'pl');
+      document.documentElement.lang = key;
+      document.querySelectorAll('.i18n').forEach((el) => {
+        const v = el.getAttribute('data-' + key);
+        if (v != null) el.textContent = v;
+      });
+    }
+    window.__applyLang = applyLang;
+    applyLang('en'); // default; tweak panel will override
+  })();
+</script>
+
+<!-- ─── Scripts ──────────────────────────────────────────────────── -->
+<script src="deck-stage.js"></script>
+<script src="image-slot.js"></script>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+
+<div id="tweaks-mount"></div>
+
+<script type="text/babel">
+  const UNI_TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "lang": "pl",
+    "red": "#9A342D",
+    "density": "regular",
+    "dark": false,
+    "footer": true,
+    "showPartners": false,
+    "bullets": "diamond",
+    "codeTheme": "dark"
+  }/*EDITMODE-END*/;
+
+  function UniTweaksApp() {
+    const [t, setTweak] = useTweaks(UNI_TWEAK_DEFAULTS);
+
+    React.useEffect(() => {
+      const r = document.documentElement.style;
+      r.setProperty('--pwr-red', t.red);
+      // Derive a darker shade for accents on cream
+      const hex = t.red.replace('#','');
+      const num = parseInt(hex, 16);
+      const dr = Math.max(0, ((num >> 16) & 255) * 0.7) | 0;
+      const dg = Math.max(0, ((num >> 8) & 255) * 0.7) | 0;
+      const db = Math.max(0, (num & 255) * 0.7) | 0;
+      r.setProperty('--pwr-red-d', '#' + ((1 << 24) | (dr << 16) | (dg << 8) | db).toString(16).slice(1));
+
+      const cls = document.body.classList;
+      cls.toggle('dark', !!t.dark);
+      cls.remove('compact', 'spacious');
+      if (t.density === 'compact')  cls.add('compact');
+      if (t.density === 'spacious') cls.add('spacious');
+      cls.toggle('no-footer', !t.footer);
+      cls.toggle('no-partners', !t.showPartners);
+      cls.remove('bullets-square', 'bullets-dash');
+      if (t.bullets === 'square') cls.add('bullets-square');
+      if (t.bullets === 'dash')   cls.add('bullets-dash');
+      cls.toggle('code-light', t.codeTheme === 'light');
+
+      if (window.__applyLang) window.__applyLang(t.lang);
+    }, [t]);
+
+    return (
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Language" />
+        <TweakRadio
+          label="Language"
+          value={t.lang}
+          options={[
+            { value: 'en', label: 'English' },
+            { value: 'pl', label: 'Polski' },
+          ]}
+          onChange={(v) => setTweak('lang', v)}
+        />
+
+        <TweakSection label="Brand" />
+        <TweakColor
+          label="Primary red"
+          value={t.red}
+          options={['#9A342D', '#7a0019', '#C00000', '#6c241f', '#000000']}
+          onChange={(v) => setTweak('red', v)}
+        />
+        <TweakToggle
+          label="Dark mode"
+          value={t.dark}
+          onChange={(v) => setTweak('dark', v)}
+        />
+
+        <TweakSection label="Layout" />
+        <TweakRadio
+          label="Density"
+          value={t.density}
+          options={[
+            { value: 'compact',  label: 'Compact' },
+            { value: 'regular',  label: 'Regular' },
+            { value: 'spacious', label: 'Spacious' },
+          ]}
+          onChange={(v) => setTweak('density', v)}
+        />
+        <TweakToggle
+          label="Show footer"
+          value={t.footer}
+          onChange={(v) => setTweak('footer', v)}
+        />
+        <TweakToggle
+          label="Partner badges"
+          value={t.showPartners}
+          onChange={(v) => setTweak('showPartners', v)}
+        />
+
+        <TweakSection label="Detail" />
+        <TweakRadio
+          label="Bullets"
+          value={t.bullets}
+          options={[
+            { value: 'diamond', label: '◆' },
+            { value: 'square',  label: '■' },
+            { value: 'dash',    label: '—' },
+          ]}
+          onChange={(v) => setTweak('bullets', v)}
+        />
+        <TweakRadio
+          label="Code theme"
+          value={t.codeTheme}
+          options={[
+            { value: 'dark',  label: 'Dark' },
+            { value: 'light', label: 'Light' },
+          ]}
+          onChange={(v) => setTweak('codeTheme', v)}
+        />
+      </TweaksPanel>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('tweaks-mount')).render(<UniTweaksApp />);
+</script>
+
+</body>
+</html>
